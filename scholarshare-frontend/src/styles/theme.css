@@ -1,0 +1,169 @@
+/* ------------------------------------------------------------------
+   Design tokens
+   ------------------------------------------------------------------ */
+:root {
+  --ink: #15243a;
+  --navy: #1c375b;
+  --cream: #f7f9fc;
+  --orange: #b34172;
+  --gold: #8daad1;
+  --line: #c9d4e2;
+  --muted: #607087;
+
+  /* Fluid spacing/typography scales: min value on small screens,
+     scale smoothly up to the max value on large screens instead of
+     jumping between fixed breakpoint values. */
+  --space-section-y: clamp(48px, 6vw, 85px);
+  --space-section-x: clamp(20px, 6vw, 7%);
+  --font-h1: clamp(34px, 6vw, 64px);
+  --font-h2: clamp(26px, 4vw, 42px);
+  --font-h3: clamp(19px, 2.4vw, 23px);
+  --container-max: 1440px;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Reserved for a future dark theme. The site currently opts in to
+     light-only, but tokens are centralized here so a dark palette is
+     a one-place change later. */
+}
+
+/* ------------------------------------------------------------------
+   Reset
+   ------------------------------------------------------------------ */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--ink);
+  background: #fff;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+img,
+svg {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Layout utilities shared across pages
+   ------------------------------------------------------------------ */
+.page-container {
+  max-width: var(--container-max);
+  margin-inline: auto;
+}
+
+.section {
+  padding: var(--space-section-y) var(--space-section-x);
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 20px 30px;
+  margin-bottom: 38px;
+}
+
+.section-head h2 {
+  font: 500 var(--font-h2) / 1.12 Georgia, serif;
+  max-width: 700px;
+}
+
+.section-head > a {
+  font-weight: 800;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.kicker {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--gold);
+  margin-bottom: 18px;
+}
+
+.kicker.dark {
+  color: #4172b3;
+}
+
+/* Shared brand icon: used by both Navbar and Footer, so it lives
+   here rather than being duplicated in (or missing from) either
+   component's own stylesheet. */
+.brand-mark {
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  background: var(--orange);
+  color: #fff;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.light-btn {
+  display: inline-block;
+  border-radius: 10px;
+  background: #fff;
+  color: #111;
+  padding: 15px 20px;
+  font-weight: 800;
+}
+
+/* Generic status text used by any page that talks to the API
+   (search results, forms, category/topic lists). Keeping these
+   here means every page gets consistent loading/error/empty
+   styling for free. */
+.status-message {
+  padding: 40px var(--space-section-x);
+  text-align: center;
+  color: var(--muted);
+}
+
+.status-message.error {
+  color: var(--orange);
+}

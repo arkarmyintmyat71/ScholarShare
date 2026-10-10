@@ -1,0 +1,522 @@
+/* ------------------------------------------------------------------
+   Hero
+   ------------------------------------------------------------------ */
+.hero {
+  background: var(--navy);
+  color: #fff;
+  display: grid;
+  grid-template-columns: 1fr;
+  overflow: hidden;
+}
+
+.hero-copy {
+  padding: clamp(40px, 8vw, 90px) 6% clamp(36px, 6vw, 70px);
+}
+
+.hero h1 {
+  font-family: Georgia, serif;
+  font-size: var(--font-h1);
+  line-height: 1.05;
+  font-weight: 500;
+  letter-spacing: -1px;
+}
+
+.hero h1 span {
+  display: block;
+  color: var(--gold);
+}
+
+.lead {
+  font-size: clamp(15px, 2vw, 19px);
+  line-height: 1.55;
+  max-width: 650px;
+  margin: 20px 0 26px;
+  color: #e5e9ec;
+}
+
+.search-box {
+  display: flex;
+  flex-direction: column;
+  max-width: 720px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px;
+  gap: 6px;
+}
+
+.search-box input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  padding: 15px;
+  color: #222;
+  min-width: 0;
+  border-radius: 8px;
+}
+
+.search-box input:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--navy);
+}
+
+.search-box button {
+  border: 0;
+  border-radius: 8px;
+  background: var(--orange);
+  color: #000;
+  font-weight: 800;
+  padding: 14px;
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.1s;
+}
+
+.search-box button:hover,
+.search-box button:focus-visible {
+  background: #9c3a63;
+  color: #fff;
+}
+
+.search-box button:active {
+  transform: scale(0.98);
+}
+
+.trending {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin-top: 18px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.trending button {
+  border: 0;
+  background: transparent;
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 4px 2px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.trending button:hover,
+.trending button:focus-visible {
+  color: var(--gold);
+}
+
+/* The illustrated hero panel is decorative, so it's the first thing
+   dropped on small screens rather than being squeezed into a
+   layout it wasn't designed for. */
+.hero-art {
+  display: none;
+}
+
+/* ------------------------------------------------------------------
+   Quick strip
+   ------------------------------------------------------------------ */
+.quick-strip {
+  background: var(--gold);
+  border-end-end-radius: 10px;
+  border-end-start-radius: 10px;
+  display: grid;
+  /* Three even columns from the start: with a 2-column base grid, the
+     third item ("Connect") had nowhere to go and sat orphaned alone
+     on its own row with an empty gap beside it. */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 20px 5%;
+  align-items: center;
+  gap: 16px 10px;
+}
+
+.quick-strip p {
+  grid-column: 1 / -1;
+  font: 700 clamp(16px, 2vw, 19px) Georgia;
+}
+
+.quick-strip div {
+  /* Was a hardcoded blue (#4172b3) that didn't belong to this
+     palette; a translucent dark divider reads correctly against the
+     gold background instead. */
+  border-left: 1px solid rgb(15 32 48 / 0.25);
+  padding-left: 14px;
+  min-width: 0;
+}
+
+.quick-strip b,
+.quick-strip span {
+  display: block;
+}
+
+.quick-strip span {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* ------------------------------------------------------------------
+   Explore / research cards
+   ------------------------------------------------------------------ */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+/* ------------------------------------------------------------------
+   Categories ("path")
+   ------------------------------------------------------------------ */
+.path {
+  background: var(--navy);
+  color: #fff;
+  border-radius: 24px;
+  padding: clamp(36px, 6vw, 85px) 6%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+
+.path h2 {
+  font: 500 var(--font-h2) / 1.12 Georgia, serif;
+}
+
+.path > div > p:not(.kicker) {
+  line-height: 1.6;
+  color: #dce4e9;
+  margin: 22px 0;
+}
+
+/* This button had no styles at all, so it fell back to a default
+   blue, underlined browser link on a dark navy background — a ghost
+   button that inverts to solid gold on hover/focus. */
+.light-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgb(255 255 255 / 0.45);
+  border-radius: 999px;
+  padding: 12px 22px;
+  color: #000000;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.light-btn:hover,
+.light-btn:focus-visible {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #16232f;
+}
+
+.subject-list {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.subject-list a {
+  padding: 20px 8px;
+  border-bottom: 1px solid #61707a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.15s, padding-left 0.15s;
+}
+
+.subject-list a span {
+  transition: transform 0.15s;
+}
+
+.subject-list a:hover,
+.subject-list a:focus-visible {
+  color: var(--gold);
+  padding-left: 14px;
+}
+
+.subject-list a:hover span,
+.subject-list a:focus-visible span {
+  transform: translateX(4px);
+}
+
+/* ------------------------------------------------------------------
+   Topics
+   ------------------------------------------------------------------ */
+.topic-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+/* ------------------------------------------------------------------
+   Community ("about")
+   ------------------------------------------------------------------ */
+.community {
+  padding: clamp(36px, 6vw, 85px) 6%;
+  background: var(--gold);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+
+.community h2 {
+  font: 500 var(--font-h2) / 1.12 Georgia, serif;
+}
+
+.community ul {
+  margin: 24px 0 0 20px;
+  line-height: 2;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 26px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.stat-card strong {
+  font: 600 clamp(20px, 2.4vw, 27px) Georgia;
+  color: var(--orange);
+}
+
+.stat-card span {
+  align-self: center;
+}
+
+/* ------------------------------------------------------------------
+   CTA
+   ------------------------------------------------------------------ */
+.cta {
+  text-align: center;
+  padding: clamp(40px, 8vw, 75px) 5%;
+  background: var(--cream);
+}
+
+.cta h2 {
+  font: 500 var(--font-h2) Georgia;
+}
+
+.cta p {
+  margin: 15px 0 26px;
+  color: #555;
+}
+
+.cta a {
+  display: inline-block;
+  background: var(--orange);
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 800;
+  padding: 14px 22px;
+  margin: 5px;
+  text-decoration: none;
+  transition: background-color 0.15s, transform 0.1s;
+}
+
+.cta a:hover,
+.cta a:focus-visible {
+  background: #a8461f;
+}
+
+.cta a:active {
+  transform: scale(0.98);
+}
+
+.cta a.register {
+  display: inline-block;
+  background: var(--orange);
+  color: #000;
+  border-radius: 10px;
+  padding: 12px 16px;
+  text-align: center;
+  white-space: nowrap;
+  transition: background-color 0.15s, transform 0.1s;
+}
+
+.cta a.secondary {
+  background: transparent;
+  color: #111;
+  border: 1px solid #111;
+}
+
+.cta a.secondary:hover,
+.cta a.secondary:focus-visible {
+  background: #111;
+  color: #fff;
+}
+
+.cta a.register:hover,
+.cta a.register:focus-visible {
+  background: #9c3a63;
+  color: #fff;
+}
+
+.register:active {
+  transform: scale(0.97);
+}
+
+/* On the register page itself, the button reads as "selected" via a
+   ring instead of just changing its (already-orange) background. */
+.register.active {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--orange);
+}
+
+/* ------------------------------------------------------------------
+   Breakpoints: small tablet and up
+   ------------------------------------------------------------------ */
+@media (min-width: 560px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .subject-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Tablet / small laptop */
+@media (min-width: 780px) {
+  .quick-strip {
+    grid-template-columns: 2fr repeat(3, 1fr);
+  }
+
+  .quick-strip p {
+    grid-column: auto;
+  }
+
+  .path,
+  .community {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .topic-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop: bring back the illustrated hero panel and widen the grid */
+@media (min-width: 1020px) {
+  .hero {
+    grid-template-columns: 1.08fr 0.92fr;
+    min-height: 590px;
+  }
+
+  .hero-copy {
+    padding: 90px 8% 70px 10%;
+  }
+
+  .search-box {
+    flex-direction: row;
+    padding: 6px;
+  }
+
+  .search-box button {
+    padding: 0 30px;
+  }
+
+  .hero-art {
+    display: block;
+    position: relative;
+    background: linear-gradient(145deg, #183447, #0e1b27);
+    min-height: 500px;
+  }
+
+  .hero-photo-wrap {
+    position: absolute;
+    width: 68%;
+    height: 68%;
+    left: 9%;
+    top: 13%;
+    transform: rotate(-4deg);
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 28px 50px #0005;
+    border: 8px solid var(--cream);
+  }
+
+  .hero-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero-photo-wrap::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      transparent 42%,
+      rgba(21, 36, 58, 0.78) 100%
+    );
+  }
+
+  .hero-photo-label {
+    position: absolute;
+    left: 30px;
+    bottom: 28px;
+    z-index: 2;
+    color: #fff;
+  }
+
+  .hero-photo-label span {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .hero-photo-label b {
+    font: 600 27px/1.05 Georgia, serif;
+  }
+
+  .paper {
+    position: absolute;
+    background: var(--cream);
+    color: #111;
+    box-shadow: 0 28px 50px #0005;
+  }
+
+  .p2 {
+    width: 150px;
+    height: 190px;
+    right: 10%;
+    border-radius: 20px;
+    bottom: 65px;
+    background: var(--orange);
+    color: #fff;
+    font: 900 85px Georgia;
+    display: grid;
+    place-items: center;
+    transform: rotate(9deg);
+  }
+
+  .dot-grid {
+    position: absolute;
+    width: 160px;
+    height: 160px;
+    right: 8%;
+    top: 35px;
+    background-image: radial-gradient(var(--gold) 2px, transparent 2px);
+    background-size: 16px 16px;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .topic-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

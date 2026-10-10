@@ -1,0 +1,68 @@
+.research-card {
+  border: 1px solid #cfcfcf;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  min-height: 380px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.research-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px #0001;
+}
+
+.card-top {
+  border-radius: 20px;
+  height: 160px;
+  display: grid;
+  place-items: center;
+  font: 800 28px Georgia;
+  overflow: hidden;
+  background: #dce7f5;
+}
+
+.photo-top img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.research-card:hover .photo-top img {
+  transform: scale(1.045);
+}
+
+.card-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.card-body > span {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  color: #4172b3;
+}
+
+.card-body h3 {
+  font: 600 clamp(19px, 2.2vw, 23px) / 1.15 Georgia;
+  margin: 14px 0;
+}
+
+.card-body p {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #555;
+}
+
+.card-body footer {
+  margin-top: auto;
+  padding-top: 22px;
+  border-top: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}

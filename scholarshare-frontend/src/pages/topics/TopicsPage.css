@@ -1,0 +1,15 @@
+.topics-page-grid {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 780px) {
+  .topics-page-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1020px) {
+  .topics-page-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

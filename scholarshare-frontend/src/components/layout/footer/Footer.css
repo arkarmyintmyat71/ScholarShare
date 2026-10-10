@@ -1,0 +1,95 @@
+.footer {
+  --footer-line: rgb(255 255 255 / 0.12);
+  --footer-muted: #a0a0a6;
+  --footer-dim: #85858c;
+
+  background: #111;
+  color: #fff;
+  border-start-start-radius: 20px;
+  border-start-end-radius: 20px;
+  padding: 32px 6% 20px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 12px;
+}
+
+.footer-brand {
+  grid-column: 1 / -1;
+}
+
+.footer-brand .brand-mark {
+  margin-bottom: 14px;
+}
+
+.footer-brand h3 {
+  font-size: 20px;
+}
+
+.footer-brand p {
+  color: var(--footer-muted);
+  line-height: 1.5;
+  margin-top: 8px;
+  max-width: 40ch;
+}
+
+/* Three link columns, from mobile up. minmax(0, 1fr) above keeps them
+   from overflowing the grid when a label like "Forgot Password" is
+   wider than the column. */
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12.5px;
+  min-width: 0;
+}
+
+.footer-col b {
+  display: block;
+  font-size: 12px;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.footer-col a {
+  color: var(--footer-muted);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: color 0.15s;
+}
+
+.footer-col a:hover,
+.footer-col a:focus-visible {
+  color: var(--gold, #d8b34e);
+}
+
+.copyright {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--footer-line);
+  padding-top: 16px;
+  color: var(--footer-dim);
+  font-size: 12px;
+}
+
+@media (min-width: 640px) {
+  .footer {
+    padding: 44px 6% 24px;
+    gap: 34px 20px;
+  }
+
+  .footer-col {
+    font-size: 13px;
+    gap: 12px;
+  }
+}
+
+@media (min-width: 1000px) {
+  .footer {
+    grid-template-columns: 2fr repeat(3, minmax(0, 1fr));
+    padding: 55px 7% 25px;
+    gap: 40px;
+  }
+
+  .footer-brand {
+    grid-column: auto;
+  }
+}

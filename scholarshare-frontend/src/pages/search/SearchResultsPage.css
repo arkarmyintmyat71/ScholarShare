@@ -1,0 +1,22 @@
+.search-grid {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 560px) {
+  .search-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1020px) {
+  .search-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.search-page code {
+  background: #f1f1f1;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
