@@ -28,14 +28,19 @@
 .brand-mark {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   background: var(--orange);
   color: #fff;
   font-weight: 800;
-  font-size: 16px;
+  font-size: 18px;
   flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.brand:hover .brand-mark {
+  transform: rotate(-6deg) scale(1.05);
 }
 
 .brand-content strong {
@@ -145,12 +150,14 @@
   padding: 6px 5% 18px;
   flex-direction: column;
   gap: 2px;
+  background: #fff;
   border-bottom: 1px solid var(--line, #e4e1da);
   box-shadow: var(--header-shadow);
 }
 
 .main-nav.open {
   display: flex;
+  animation: pop 0.18s ease;
 }
 
 .main-nav a {
@@ -203,7 +210,7 @@
 
 .register:hover,
 .register:focus-visible {
-  background: #9c3a63;
+  background: var(--orange-hover);
   color: #fff;
 }
 
@@ -296,5 +303,42 @@
 @media (max-width: 420px) {
   .brand-content small {
     display: none;
+  }
+}
+/* "Sign out" is a <button>, styled to sit alongside the nav links. */
+.sign-out-btn {
+  background: none;
+  border: 0;
+  padding: 12px 6px;
+  font-weight: 700;
+  font-size: 15px;
+  text-align: left;
+  color: inherit;
+}
+
+.sign-out-btn:hover,
+.sign-out-btn:focus-visible {
+  color: var(--orange);
+}
+
+@media (min-width: 860px) {
+  .sign-out-btn {
+    padding: 0;
+    font-size: 14px;
+  }
+}
+
+/* The orange button keeps white text even though nav links use "color: inherit". */
+.site-header .register,
+.site-header .register:hover,
+.site-header .register:focus-visible {
+  color: #fff;
+}
+
+@media (min-width: 860px) {
+  .brand-mark {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
   }
 }

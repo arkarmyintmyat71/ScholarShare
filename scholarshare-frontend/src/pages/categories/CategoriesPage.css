@@ -8,16 +8,33 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 26px 24px;
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--radius-card);
+  background: #fff;
   font-weight: 700;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, color var(--ease);
+}
+
+.category-tile span {
+  transition: transform var(--ease);
 }
 
 .category-tile:hover,
 .category-tile:focus-visible {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lift);
   border-color: var(--orange);
   color: var(--orange);
+}
+
+.category-tile:hover span,
+.category-tile:focus-visible span {
+  transform: translateX(4px);
+}
+
+.category-tile:active {
+  transform: scale(0.98);
 }
 
 @media (min-width: 560px) {

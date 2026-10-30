@@ -1,0 +1,129 @@
+/* Same card as the main site: 20px corners, lifts on hover, photo zooms. */
+.sd-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 380px;
+  background: #fff;
+  border: 1px solid #cfcfcf;
+  border-radius: var(--sd-radius-card);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.sd-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--sd-shadow-lift);
+  border-color: var(--sd-light);
+}
+
+.sd-card-photo {
+  height: 160px;
+  overflow: hidden;
+  border-radius: var(--sd-radius-card);
+  background: #dce7f5;
+}
+
+.sd-card-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.sd-card:hover .sd-card-photo img {
+  transform: scale(1.045);
+}
+
+.sd-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 22px;
+}
+
+.sd-card-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  color: var(--sd-blue);
+}
+
+.sd-card h3 {
+  margin: 14px 0;
+  font: 600 clamp(19px, 2.2vw, 23px) / 1.15 Georgia, serif;
+}
+
+.sd-card p {
+  margin-bottom: 20px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #555;
+}
+
+.sd-card-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid #ddd;
+}
+
+/* Pill buttons that fill on hover and press in on click. */
+.sd-action {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #555;
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background-color var(--sd-ease), color var(--sd-ease), transform 0.1s;
+}
+
+.sd-action:hover {
+  background: var(--sd-cream);
+  color: var(--sd-navy);
+}
+
+.sd-action:active {
+  transform: scale(0.95);
+}
+
+.sd-action small {
+  display: inline;
+  margin-left: 5px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--sd-cream);
+  font-size: 11px;
+  letter-spacing: 0;
+  color: inherit;
+}
+
+.sd-action.is-reacted,
+.sd-save.saved {
+  background: rgb(179 65 114 / 0.1);
+  color: var(--sd-pink);
+}
+
+.sd-save.saved svg {
+  fill: currentColor;
+}
+
+.sd-card-meta {
+  display: block;
+  margin: -8px 0 18px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sd-slate);
+}
+
+a.sd-action {
+  text-decoration: none;
+  color: inherit;
+}

@@ -1,0 +1,134 @@
+.sd-hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  overflow: hidden;
+  background: var(--navy);
+  color: #fff;
+  scroll-margin-top: 78px;
+}
+
+.sd-hero-copy {
+  padding: clamp(40px, 8vw, 80px) 6% clamp(36px, 6vw, 64px);
+}
+
+.sd-hero .sd-eyebrow {
+  color: var(--gold);
+}
+
+.sd-hero h1 {
+  font: 500 var(--font-h1) / 1.05 Georgia, serif;
+  letter-spacing: -1px;
+}
+
+.sd-hero h1 span {
+  display: block;
+  color: var(--gold);
+}
+
+.sd-hero-copy p {
+  max-width: 560px;
+  margin: 20px 0 26px;
+  font-size: clamp(15px, 2vw, 19px);
+  line-height: 1.55;
+  color: #e5e9ec;
+}
+
+.sd-hero-art {
+  display: none;
+}
+
+@media (min-width: 1020px) {
+  .sd-hero {
+    grid-template-columns: 1.08fr 0.92fr;
+    min-height: 480px;
+  }
+
+  .sd-hero-copy {
+    padding: 80px 8% 64px 10%;
+  }
+
+  .sd-hero-art {
+    position: relative;
+    display: block;
+    min-height: 440px;
+    background: linear-gradient(145deg, #183447, #0e1b27);
+  }
+
+  .sd-hero-photo {
+    position: absolute;
+    left: 9%;
+    top: 12%;
+    width: 68%;
+    height: 72%;
+    overflow: hidden;
+    border: 8px solid var(--cream);
+    background: #fff;
+    box-shadow: 0 28px 50px #0005;
+    transform: rotate(-4deg);
+    transition: transform 0.35s ease;
+  }
+
+  .sd-hero-art:hover .sd-hero-photo {
+    transform: rotate(-2deg) scale(1.02);
+  }
+
+  .sd-hero-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .sd-hero-photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 42%, rgb(21 36 58 / 0.78) 100%);
+  }
+
+  .sd-hero-label {
+    position: absolute;
+    left: 28px;
+    bottom: 26px;
+    z-index: 2;
+    color: #fff;
+  }
+
+  .sd-hero-label span {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--gold);
+  }
+
+  .sd-hero-label b {
+    font: 600 24px / 1.1 Georgia, serif;
+  }
+
+  .sd-hero-paper {
+    position: absolute;
+    right: 10%;
+    bottom: 55px;
+    display: grid;
+    place-items: center;
+    width: 130px;
+    height: 165px;
+    border-radius: 20px;
+    background: var(--orange);
+    color: #fff;
+    font: 900 75px Georgia, serif;
+    box-shadow: 0 28px 50px #0005;
+    transform: rotate(9deg);
+  }
+
+  .sd-hero-dots {
+    position: absolute;
+    right: 8%;
+    top: 30px;
+    width: 160px;
+    height: 160px;
+    background-image: radial-gradient(var(--gold) 2px, transparent 2px);
+    background-size: 16px 16px;
+  }
+}

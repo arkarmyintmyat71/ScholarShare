@@ -1,4 +1,5 @@
 package com.scholarshare.scholarshare_backend.entities;
+
 import com.scholarshare.scholarshare_backend.entities.enums.AccountStatus;
 import com.scholarshare.scholarshare_backend.entities.enums.Provider;
 import com.scholarshare.scholarshare_backend.entities.enums.Role;
@@ -11,15 +12,9 @@ import lombok.Setter;
 
 import java.time.Instant;
 
+/** Table 3.6.1 of the thesis. */
 @Entity
-@Table(
-        name = "users",
-        indexes = {
-                // Speeds up the two hottest lookups: login-by-email and google-id lookup.
-                @Index(name = "idx_users_email", columnList = "email", unique = true),
-                @Index(name = "idx_users_google_id", columnList = "google_id", unique = true)
-        }
-)
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -37,34 +32,29 @@ public class User {
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
-    /** BCrypt hash. Null when provider = GOOGLE. **/
+    /** BCrypt hash. Null when provider = GOOGLE. */
     @Column(name = "password_hash")
     private String passwordHash;
 
-    @Column(name = "picture_url")
+    @Column(name = "picture_url", length = 255)
     private String pictureUrl;
 
+    // columnDefinition keeps these as plain VARCHAR (Hibernate would otherwise create MySQL ENUM columns).
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
     private Role role;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
     private Provider provider;
 
     /** Google account id. Unique when set. Null when provider = LOCAL. */
-    @Column(name = "google_id")
+    @Column(name = "google_id", unique = true)
     private String googleId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "account_status", nullable = false)
+    @Column(name = "account_status", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
     private AccountStatus accountStatus;
-
-    @Column(name = "university", nullable = false,  length = 150)
-    private String university;
-
-    @Column(name = "bio",  length = 500)
-    private String bio;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

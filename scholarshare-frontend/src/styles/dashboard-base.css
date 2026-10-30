@@ -1,0 +1,142 @@
+/* Student dashboard look = the main ScholarShare site's look.
+   Colours, radii and motion come from styles/theme.css so the two stay in sync.
+   Classes are prefixed `sd-` so they can't clash with the public site. */
+
+.student-app {
+  /* Aliases onto the main theme tokens (see styles/theme.css). */
+  --sd-navy: var(--navy);
+  --sd-slate: var(--muted);
+  --sd-blue: var(--blue);
+  --sd-light: var(--gold);
+  --sd-pink: var(--orange);
+  --sd-pink-hover: var(--orange-hover);
+  --sd-border: var(--line);
+  --sd-cream: var(--cream);
+
+  /* Same shapes as the main site: 20px cards, 10px controls, pill buttons. */
+  --sd-radius-card: var(--radius-card);
+  --sd-radius-panel: var(--radius-panel);
+  --sd-radius-control: var(--radius-control);
+  --sd-ease: var(--ease);
+  --sd-shadow-lift: var(--shadow-lift);
+  --sd-shadow-pop: var(--shadow-pop);
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #fff;
+  color: var(--ink);
+}
+
+.student-main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+}
+
+/* Keyboard focus: one consistent ring everywhere in the student area. */
+.student-app :is(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--sd-pink);
+  outline-offset: 2px;
+}
+
+.sd-eyebrow {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--sd-blue);
+}
+
+.sd-section {
+  padding: clamp(36px, 5vw, 64px) var(--space-section-x);
+  scroll-margin-top: 78px; /* keeps headings clear of the sticky top bar */
+}
+
+.sd-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 20px 30px;
+  margin-bottom: 32px;
+}
+
+.sd-section-heading h2 {
+  max-width: 700px;
+  font: 500 var(--font-h2) / 1.12 Georgia, serif;
+}
+
+.sd-section-heading p {
+  margin-top: 12px;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* Buttons: same as the main site's orange call-to-action. */
+.sd-btn {
+  display: inline-block;
+  border: 0;
+  border-radius: var(--sd-radius-control);
+  padding: 14px 22px;
+  font-weight: 800;
+  font-size: 14px;
+  transition: background-color var(--sd-ease), color var(--sd-ease), transform 0.1s;
+}
+
+.sd-btn:active {
+  transform: scale(0.98);
+}
+
+.sd-btn-primary {
+  background: var(--sd-pink);
+  color: #fff;
+}
+
+.sd-btn-primary:hover,
+.sd-btn-primary:focus-visible {
+  background: var(--sd-pink-hover);
+  color: #fff;
+}
+
+/* Content panel: cream card with the orange top edge, like the main site's topic cards. */
+.sd-panel {
+  padding: 26px;
+  background: var(--sd-cream);
+  border-radius: var(--sd-radius-card);
+  border-top: 5px solid var(--sd-pink);
+}
+
+.sd-muted {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.sd-hint {
+  font-size: 12px;
+  color: var(--sd-slate);
+  line-height: 1.6;
+}
+
+.sd-empty {
+  padding: 26px;
+  border: 1px dashed var(--sd-border);
+  border-radius: var(--sd-radius-card);
+  color: var(--sd-slate);
+  text-align: center;
+}
+
+/* One-off entrance used by every pop-up/dropdown. */
+@keyframes sd-pop {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (max-width: 460px) {
+  .sd-section-heading {
+    margin-bottom: 24px;
+  }
+}

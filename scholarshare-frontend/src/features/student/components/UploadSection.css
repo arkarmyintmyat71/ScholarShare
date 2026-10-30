@@ -1,0 +1,97 @@
+/* White card with a soft shadow, like the main site's login/register card. */
+.sd-form {
+  padding: clamp(22px, 4vw, 36px);
+  background: #fff;
+  border: 1px solid var(--sd-border);
+  border-top: 1px solid var(--sd-border);
+  border-radius: var(--sd-radius-card);
+  box-shadow: 0 12px 30px #0001;
+}
+
+.sd-form label {
+  display: block;
+  margin-bottom: 18px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.sd-form input,
+.sd-form textarea,
+.sd-form select {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 13px 14px;
+  background: #fff;
+  border: 1px solid var(--sd-border);
+  border-radius: var(--sd-radius-control);
+  color: var(--ink);
+  outline: 0;
+  transition: border-color var(--sd-ease), box-shadow var(--sd-ease);
+}
+
+.sd-form input:hover,
+.sd-form textarea:hover,
+.sd-form select:hover {
+  border-color: var(--sd-light);
+}
+
+.student-app .sd-form :is(input, textarea, select):focus-visible {
+  border-color: var(--sd-pink);
+  box-shadow: 0 0 0 3px rgb(179 65 114 / 0.12);
+  outline: 0;
+}
+
+.sd-form input[type="file"] {
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.sd-form input[type="file"]::file-selector-button {
+  margin-right: 12px;
+  padding: 7px 14px;
+  border: 1px solid var(--sd-border);
+  border-radius: 999px;
+  background: var(--sd-cream);
+  color: var(--ink);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--sd-ease), border-color var(--sd-ease);
+}
+
+.sd-form input[type="file"]::file-selector-button:hover {
+  background: #fff;
+  border-color: var(--sd-pink);
+}
+
+.sd-field-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 18px;
+}
+
+@media (min-width: 780px) {
+  .sd-field-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.sd-form .sd-hint {
+  margin-bottom: 18px;
+}
+
+.sd-feedback {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: var(--sd-radius-control);
+  background: rgb(65 114 179 / 0.1);
+  color: #2f5b94;
+  font-size: 13px;
+  font-weight: 700;
+  animation: sd-pop 0.2s ease;
+}
+
+.sd-feedback.error {
+  background: rgb(179 65 114 / 0.1);
+  color: #8f2d57;
+}

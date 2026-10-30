@@ -1,28 +1,34 @@
+import { Link } from "react-router-dom";
+
+import { researchPath } from "../../config/constants";
+import { categoryImage } from "../../utils/categoryImage";
 import "./ResearchCard.css";
 
 /**
- * A single research summary card. Presentational only — the parent
- * page decides where the data (`tag`, `title`, etc.) comes from,
- * whether that's the static homeContent data file today or a
- * `researchService.getFeatured()` API call later.
+ * A research summary card for the public site. Presentational only: the page passes
+ * a `research` object from the API (see services/researchService.js).
  */
-function ResearchCard({ tag, title, description, image }) {
+function ResearchCard({ research }) {
+  const { id, title, description, categoryName, academicYear } = research;
+
   return (
-    <article className="research-card">
-      <div className="card-top photo-top">
-        <img src={image} alt="" loading="lazy" />
-      </div>
+    <Link to={researchPath(id)} className="research-card-link">
+      <article className="research-card">
+        <div className="card-top photo-top">
+          <img src={categoryImage(categoryName)} alt="" loading="lazy" />
+        </div>
 
-      <div className="card-body">
-        <span>{tag}</span>
-        <h3>{title}</h3>
-        <p>{description}</p>
+        <div className="card-body">
+          <span>{categoryName.toUpperCase()} · {academicYear}</span>
+          <h3>{title}</h3>
+          <p>{description}</p>
 
-        <footer>
-          Research Resource <b aria-hidden="true">→</b>
-        </footer>
-      </div>
-    </article>
+          <footer>
+            View research <b aria-hidden="true">→</b>
+          </footer>
+        </div>
+      </article>
+    </Link>
   );
 }
 

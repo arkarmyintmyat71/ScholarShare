@@ -3,16 +3,19 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import FormField from "../../components/formField/FormField";
 import { useAuth } from "../../hooks/useAuth";
+import { homeRouteForUser } from "../../utils/roles";
 import "./AuthPage.css";
 
 function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectTo = location.state?.from ?? "/";
+  // Set by ProtectedRoute when someone was bounced to the login page.
+  const cameFrom = location.state?.from;
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState(null);
+  const [accountStatus, setAccountStatus] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (event) => {
@@ -22,14 +25,18 @@ function LoginPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError(null);
+    setAccountStatus(null);
     setIsSubmitting(true);
 
     try {
-      await login(form);
-      navigate(redirectTo, { replace: true });
+      const user = await login(form);
+      // Role is only known once login succeeds: admins and students land in different places.
+      navigate(cameFrom ?? homeRouteForUser(user), { replace: true });
     } catch (err) {
       // err.message comes from the interceptor in services/api/httpClient.js
+      // 403 carries a clear reason: waiting for approval, rejected, or disabled.
       setError(err.message ?? "Sign in failed. Please try again.");
+      setAccountStatus(err.details?.accountStatus ?? null);
     } finally {
       setIsSubmitting(false);
     }
@@ -41,7 +48,11 @@ function LoginPage() {
         <h1>Welcome back</h1>
         <p className="subtitle">Sign in to continue to ScholarShare.</p>
 
-        {error && <p className="auth-error">{error}</p>}
+        {error && (
+          <p className={`auth-error ${accountStatus ? "auth-notice" : ""}`} role="alert">
+            {error}
+          </p>
+        )}
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <FormField

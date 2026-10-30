@@ -13,12 +13,19 @@
 .form-field input {
   padding: 13px 14px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
+  background: #fff;
   outline: 0;
+  transition: border-color var(--ease), box-shadow var(--ease);
+}
+
+.form-field input:hover {
+  border-color: var(--gold);
 }
 
 .form-field input:focus-visible {
   border-color: var(--orange);
+  box-shadow: var(--focus-ring);
 }
 
 .form-field-error {

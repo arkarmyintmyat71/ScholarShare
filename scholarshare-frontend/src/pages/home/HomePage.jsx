@@ -2,19 +2,29 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import ResearchCard from "../../components/researchCard/ResearchCard";
+import StatusBlock from "../../components/StatusBlock";
 import TopicCard from "../../components/topicCard/TopicCard";
-import {
-  TRENDING_TOPICS,
-  RESEARCH_CARDS,
-  SUBJECT_CATEGORIES,
-  DISCUSSION_TOPICS,
-  ABOUT_POINTS,
-} from "../../data/homeContent";
+import { ROUTES } from "../../config/constants";
+import { TRENDING_TOPICS, ABOUT_POINTS, heroResearch } from "../../data/homeContent";
+import { useAsync } from "../../hooks/useAsync";
+import { useAuth } from "../../hooks/useAuth";
+import { getCategories } from "../../services/categoryService";
+import { searchResearch } from "../../services/researchService";
+import { getTopics } from "../../services/topicService";
 import "./HomePage.css";
+
+const HOME_RESEARCH_COUNT = 4;
+const HOME_TOPIC_COUNT = 3;
 
 function HomePage() {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  // Real data from the backend: newest approved research, categories, and (for signed-in users) topics.
+  const research = useAsync(() => searchResearch({ size: HOME_RESEARCH_COUNT }), []);
+  const categories = useAsync(getCategories, []);
+  const topics = useAsync(() => getTopics({ size: HOME_TOPIC_COUNT }), [], { enabled: isAuthenticated });
 
   const runSearch = (query) => {
     const trimmed = query.trim();
@@ -80,7 +90,7 @@ function HomePage() {
         <div className="hero-art" aria-hidden="true">
           <div className="hero-photo-wrap">
             <img
-              src="https://picsum.photos/seed/scholarshare-hero/640/640"
+              src={heroResearch}
               alt=""
               className="hero-photo"
             />
@@ -127,11 +137,15 @@ function HomePage() {
           <Link to="/categories">Browse all categories →</Link>
         </div>
 
+        <StatusBlock isLoading={research.isLoading && !research.data} error={research.error} onRetry={research.reload} />
         <div className="card-grid">
-          {RESEARCH_CARDS.map((card) => (
-            <ResearchCard key={card.id} {...card} />
+          {(research.data?.content ?? []).map((item) => (
+            <ResearchCard key={item.id} research={item} />
           ))}
         </div>
+        {research.data && research.data.content.length === 0 && (
+          <p className="status-message">No research has been published yet.</p>
+        )}
       </section>
 
       {/* Categories */}
@@ -151,9 +165,9 @@ function HomePage() {
         </div>
 
         <div className="subject-list" id="categoryList">
-          {SUBJECT_CATEGORIES.map(({ label, to }) => (
-            <Link key={to} to={to}>
-              {label} <span aria-hidden="true">→</span>
+          {(categories.data ?? []).map(({ id, name }) => (
+            <Link key={id} to={`${ROUTES.search}?categoryId=${id}`}>
+              {name} <span aria-hidden="true">→</span>
             </Link>
           ))}
         </div>
@@ -167,14 +181,27 @@ function HomePage() {
             <h2>Discuss ideas, not just documents</h2>
           </div>
 
-          <Link to="/topics">Explore all topics →</Link>
+          {isAuthenticated && <Link to="/topics">Explore all topics →</Link>}
         </div>
 
-        <div className="topic-grid">
-          {DISCUSSION_TOPICS.map((topic) => (
-            <TopicCard key={topic.id} {...topic} />
-          ))}
-        </div>
+        {isAuthenticated ? (
+          <>
+            <StatusBlock isLoading={topics.isLoading && !topics.data} error={topics.error} onRetry={topics.reload} />
+            <div className="topic-grid">
+              {(topics.data?.content ?? []).map((topic) => (
+                <TopicCard key={topic.id} topic={topic} />
+              ))}
+            </div>
+            {topics.data && topics.data.content.length === 0 && (
+              <p className="status-message">No topics yet. Start the first discussion!</p>
+            )}
+          </>
+        ) : (
+          <p className="pg-signin-note">
+            Discussion topics are for ScholarShare members. <Link to={ROUTES.login}>Sign in</Link> or{" "}
+            <Link to={ROUTES.register}>register</Link> to join the conversation.
+          </p>
+        )}
       </section>
 
       {/* About */}

@@ -1,0 +1,219 @@
+/* Same header as the main site: translucent white + blur, animated underline on links. */
+.sd-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 68px;
+  padding: 10px 5%;
+  background: rgb(255 255 255 / 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--sd-border);
+  color: var(--ink);
+}
+
+.sd-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: auto;
+}
+
+.sd-brand-mark {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--sd-pink);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  transition: transform 0.2s;
+}
+
+.sd-brand:hover .sd-brand-mark {
+  transform: rotate(-6deg) scale(1.05);
+}
+
+.sd-brand-content strong {
+  display: block;
+  font-size: 17px;
+  line-height: 1.2;
+}
+
+.sd-brand-content small {
+  display: block;
+  margin-top: 3px;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  color: rgb(0 0 0 / 0.45);
+}
+
+.sd-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Hamburger that morphs into an X (shared look with the main site). */
+.sd-menu-toggle {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  transition: background-color var(--sd-ease), transform 0.1s;
+}
+
+.sd-menu-toggle:hover,
+.sd-menu-toggle:focus-visible {
+  background: var(--sd-cream);
+}
+
+.sd-menu-toggle:active {
+  background: var(--sd-border);
+  transform: scale(0.94);
+}
+
+.sd-menu-bars {
+  position: relative;
+  display: block;
+  width: 20px;
+  height: 14px;
+}
+
+.sd-menu-bars span {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ink);
+  transition: transform 0.2s ease, opacity 0.15s ease, top 0.2s ease;
+}
+
+.sd-menu-bars span:nth-child(1) { top: 0; }
+.sd-menu-bars span:nth-child(2) { top: 6px; }
+.sd-menu-bars span:nth-child(3) { top: 12px; }
+
+.sd-menu-toggle.is-open .sd-menu-bars span:nth-child(1) { top: 6px; transform: rotate(45deg); }
+.sd-menu-toggle.is-open .sd-menu-bars span:nth-child(2) { opacity: 0; }
+.sd-menu-toggle.is-open .sd-menu-bars span:nth-child(3) { top: 6px; transform: rotate(-45deg); }
+
+/* Mobile: links live in a drop-down panel. */
+.sd-nav {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 5% 18px;
+  background: #fff;
+  border-bottom: 1px solid var(--sd-border);
+  box-shadow: 0 10px 30px -18px rgb(0 0 0 / 0.35);
+}
+
+.sd-nav.open {
+  display: flex;
+  animation: sd-pop 0.18s ease;
+}
+
+.sd-nav a {
+  position: relative;
+  padding: 12px 6px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  transition: background-color var(--sd-ease), color var(--sd-ease);
+}
+
+.sd-nav a:hover,
+.sd-nav a:focus-visible {
+  background: var(--sd-cream);
+  color: var(--sd-pink);
+}
+
+.sd-nav a.active {
+  background: var(--sd-cream);
+  color: var(--sd-pink);
+  font-weight: 800;
+}
+
+@media (min-width: 860px) {
+  .sd-topbar {
+    min-height: 78px;
+    gap: 38px;
+  }
+
+  .sd-brand-mark {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .sd-menu-toggle {
+    display: none;
+  }
+
+  .sd-actions {
+    order: 2;
+  }
+
+  .sd-nav {
+    position: static;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    order: 1;
+    gap: 28px;
+    margin-right: auto;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .sd-nav a {
+    padding: 4px 0;
+    font-size: 14px;
+  }
+
+  .sd-nav a:hover,
+  .sd-nav a:focus-visible,
+  .sd-nav a.active {
+    background: none;
+  }
+
+  /* Underline that slides in on hover and stays on the current section. */
+  .sd-nav a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 100%;
+    bottom: -4px;
+    height: 2px;
+    background: var(--sd-pink);
+    transition: right 0.2s ease;
+  }
+
+  .sd-nav a:hover::after,
+  .sd-nav a:focus-visible::after,
+  .sd-nav a.active::after {
+    right: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .sd-brand-content small {
+    display: none;
+  }
+}

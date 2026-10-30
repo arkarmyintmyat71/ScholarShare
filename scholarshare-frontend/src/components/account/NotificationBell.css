@@ -1,0 +1,252 @@
+.sd-notify {
+  position: relative;
+}
+
+.sd-bell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--sd-cream);
+  color: var(--sd-navy);
+  transition: background-color 0.15s, color 0.15s, transform 0.1s;
+}
+
+.sd-bell:hover,
+.sd-bell[aria-expanded="true"] {
+  background: #e3ecf6;
+  color: var(--sd-pink);
+}
+
+.sd-bell:active {
+  transform: scale(0.94);
+}
+
+.sd-badge {
+  position: absolute;
+  top: -5px;
+  right: -9px;
+  box-sizing: content-box;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 5px;
+  border: 2px solid #fff;
+  border-radius: 12px;
+  background: #dc354b;
+  color: #fff;
+  font: 800 11px/21px Arial, sans-serif;
+  text-align: center;
+}
+
+.sd-notify-panel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  width: min(430px, calc(100vw - 24px));
+  max-height: min(660px, calc(100vh - 90px));
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--sd-border);
+  border-radius: 20px;
+  box-shadow: var(--sd-shadow-pop);
+  transform-origin: top right;
+  animation: sd-pop 0.15s ease;
+}
+
+.sd-notify-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 5px;
+}
+
+.sd-notify-head h3 {
+  font: 700 25px Arial, sans-serif;
+}
+
+.sd-notify-close {
+  padding: 3px 8px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--sd-slate);
+  font-size: 28px;
+  line-height: 1;
+  transition: background-color 0.15s;
+}
+
+.sd-notify-close:hover {
+  background: var(--sd-cream);
+}
+
+.sd-notify-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--sd-border);
+}
+
+.sd-notify-tabs {
+  display: flex;
+  gap: 5px;
+}
+
+.sd-notify-tab {
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sd-slate);
+  font-size: 13px;
+  font-weight: 700;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.sd-notify-tab:hover {
+  background: var(--sd-cream);
+}
+
+.sd-notify-tab.active {
+  background: var(--sd-pink);
+  color: #fff;
+}
+
+.sd-mark-all {
+  border: 0;
+  background: none;
+  color: var(--sd-blue);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  transition: background-color 0.15s;
+}
+
+.sd-mark-all:hover:not(:disabled) {
+  background: var(--sd-cream);
+}
+
+.sd-mark-all:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.sd-notify-list {
+  min-height: 110px;
+  overflow-y: auto;
+}
+
+.sd-notify-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 17px;
+  border: 0;
+  border-bottom: 1px solid #eff2f7;
+  background: #fff;
+  color: var(--sd-navy);
+  text-align: left;
+  transition: background-color 0.15s;
+}
+
+.sd-notify-item:hover {
+  background: #f0f4fa;
+}
+
+.sd-notify-item.unread {
+  background: rgb(141 170 209 / 0.18);
+}
+
+.sd-notify-item.unread:hover {
+  background: rgb(141 170 209 / 0.3);
+}
+
+.sd-notify-type {
+  display: grid;
+  place-items: center;
+  flex: 0 0 43px;
+  width: 43px;
+  height: 43px;
+  border-radius: 50%;
+  background: #e1eaf6;
+  color: var(--sd-blue);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.sd-notify-type.approval {
+  background: #e0f3e7;
+  color: #16804b;
+}
+
+.sd-notify-type.comment {
+  background: #fbe6ee;
+  color: var(--sd-pink);
+}
+
+.sd-notify-type.submission {
+  background: #fff2d8;
+  color: #b77914;
+}
+
+.sd-notify-text {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.sd-notify-text small {
+  display: block;
+  margin-top: 6px;
+  color: var(--sd-blue);
+  font-size: 12px;
+}
+
+.sd-unread-dot {
+  flex: 0 0 9px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--sd-blue);
+}
+
+.sd-notify-foot {
+  padding: 12px 16px;
+  border-top: 1px solid var(--sd-border);
+  color: var(--sd-slate);
+  font-size: 11px;
+  text-align: center;
+}
+
+.sd-notify-empty {
+  padding: 30px 20px;
+  color: var(--sd-slate);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* On phones the bell isn't at the screen edge, so pin the panel to the viewport. */
+@media (max-width: 560px) {
+  .sd-notify-panel {
+    position: fixed;
+    top: 78px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+  }
+}
+
+@media (max-width: 460px) {
+  .sd-notify-controls {
+    flex-wrap: wrap;
+  }
+}

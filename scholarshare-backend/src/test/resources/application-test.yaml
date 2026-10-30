@@ -1,0 +1,12 @@
+# Used by tests: an in-memory database, so no MySQL is needed.
+spring:
+  datasource:
+    url: jdbc:h2:mem:scholarshare_test;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+jwt:
+  secret: test-secret-test-secret-test-secret-123456

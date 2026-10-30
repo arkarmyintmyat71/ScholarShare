@@ -1,26 +1,61 @@
 import httpClient from "./api/httpClient";
 
 /**
- * Expected Java backend contract (adjust to match your real API):
+ * research = { id, title, description, categoryId, categoryName, academicYear, status,
+ *              fileName, contentType, fileSize, uploadedById, uploadedByName, uploadedAt, reviewedAt }
  *
- *   GET /api/research/search?q=<term>  -> [{ id, tag, title, description, image }]
- *   GET /api/categories                -> [{ label, slug }]
- *   GET /api/topics                    -> [{ id, tag, title, description, comments }]
+ * GET  /research?q&categoryId&year&page&size  -> { content, page, size, totalElements, totalPages }   (public, approved only)
+ * GET  /research/{id}                         -> research
+ * GET  /research/{id}/download                -> the file
+ * GET  /research/mine                         -> [research]   (the signed-in student's uploads, any status)
+ * POST /research (multipart)                  -> research     (status PENDING)
  */
 
-export async function searchResearch(query) {
-  const { data } = await httpClient.get("/research/search", {
-    params: { q: query },
+// Empty filters are not sent at all.
+function clean(params) {
+  return Object.fromEntries(
+    Object.entries(params).filter(([, value]) => value !== "" && value != null)
+  );
+}
+
+export async function searchResearch({ q, categoryId, year, page = 0, size } = {}) {
+  const { data } = await httpClient.get("/research", {
+    params: clean({ q: q?.trim(), categoryId, year, page, size }),
   });
   return data;
 }
 
-export async function getCategories() {
-  const { data } = await httpClient.get("/categories");
+export async function getResearch(id) {
+  const { data } = await httpClient.get(`/research/${id}`);
   return data;
 }
 
-export async function getTopics() {
-  const { data } = await httpClient.get("/topics");
+export async function getMyResearch() {
+  const { data } = await httpClient.get("/research/mine");
   return data;
+}
+
+export async function uploadResearch({ title, description, categoryId, academicYear, file }) {
+  const form = new FormData();
+  form.append("title", title);
+  form.append("description", description);
+  form.append("categoryId", categoryId);
+  form.append("academicYear", academicYear);
+  form.append("file", file);
+  // No Content-Type header: the browser adds multipart/form-data with its boundary.
+  const { data } = await httpClient.post("/research", form);
+  return data;
+}
+
+// Downloads the file and makes the browser save it under its real name.
+export async function downloadResearch({ id, fileName }) {
+  const { data } = await httpClient.get(`/research/${id}/download`, { responseType: "blob" });
+  const url = URL.createObjectURL(data);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }

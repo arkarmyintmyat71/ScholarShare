@@ -10,9 +10,11 @@
   width: 100%;
   max-width: 420px;
   background: #fff;
-  border-radius: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
   padding: 32px 26px;
   box-shadow: 0 12px 30px #0001;
+  animation: pop 0.25s ease;
 }
 
 .auth-card h1 {
@@ -34,11 +36,21 @@
 .auth-submit {
   margin-top: 6px;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   background: var(--orange);
   color: #fff;
   font-weight: 800;
   padding: 14px;
+  transition: background-color var(--ease), transform 0.1s;
+}
+
+.auth-submit:hover:not(:disabled),
+.auth-submit:focus-visible {
+  background: var(--orange-hover);
+}
+
+.auth-submit:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .auth-submit:disabled {
@@ -71,4 +83,32 @@
   .auth-page {
     min-height: calc(100vh - 78px);
   }
+}
+
+.auth-error {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-radius: var(--radius-control);
+  background: rgb(179 65 114 / 0.1);
+  color: #8f2d57;
+  font-size: 13px;
+  font-weight: 700;
+  animation: pop 0.2s ease;
+}
+
+.auth-switch a {
+  color: var(--orange);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.auth-switch a:hover {
+  color: var(--orange-hover);
+}
+
+/* Account refused for a reason that is not a typo (pending / rejected / disabled): calmer colour. */
+.auth-error.auth-notice {
+  background: rgb(65 114 179 / 0.1);
+  color: #2d4f8f;
 }

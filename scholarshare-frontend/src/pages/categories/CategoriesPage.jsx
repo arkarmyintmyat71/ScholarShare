@@ -1,8 +1,16 @@
 import { Link } from "react-router-dom";
-import { SUBJECT_CATEGORIES } from "../../data/homeContent";
+
+import StatusBlock from "../../components/StatusBlock";
+import { ROUTES } from "../../config/constants";
+import { useAsync } from "../../hooks/useAsync";
+import { getCategories } from "../../services/categoryService";
 import "./CategoriesPage.css";
 
+// Every category from the database, with the number of approved files in it.
 function CategoriesPage() {
+  const { data, error, isLoading, reload } = useAsync(getCategories, []);
+  const categories = data ?? [];
+
   return (
     <div className="section">
       <div className="section-head">
@@ -12,13 +20,19 @@ function CategoriesPage() {
         </div>
       </div>
 
+      <StatusBlock isLoading={isLoading && !data} error={error} onRetry={reload} />
+
       <div className="categories-grid">
-        {SUBJECT_CATEGORIES.map(({ label, to }) => (
-          <Link key={to} to={to} className="category-tile">
-            {label} <span aria-hidden="true">→</span>
+        {categories.map(({ id, name, researchCount }) => (
+          <Link key={id} to={`${ROUTES.search}?categoryId=${id}`} className="category-tile">
+            {name}{" "}
+            <small style={{ opacity: 0.7 }}>({researchCount})</small>{" "}
+            <span aria-hidden="true">→</span>
           </Link>
         ))}
       </div>
+
+      {data && categories.length === 0 && <p className="status-message">No categories yet.</p>}
     </div>
   );
 }

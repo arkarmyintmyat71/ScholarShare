@@ -1,0 +1,38 @@
+/* Dark footer with rounded top corners, like the main site's. */
+.sd-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 22px;
+  margin-top: clamp(36px, 5vw, 64px);
+  padding: 32px 6% 28px;
+  background: #111;
+  border-start-start-radius: 20px;
+  border-start-end-radius: 20px;
+  color: #fff;
+}
+
+.sd-footer strong {
+  font-size: 20px;
+}
+
+.sd-footer p,
+.sd-footer small {
+  color: #a0a0a6;
+}
+
+.sd-footer small {
+  font-size: 12px;
+}
+
+.sd-footer-label {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--gold);
+}
+
+@media (max-width: 760px) {
+  .sd-footer-label {
+    margin-left: 0;
+  }
+}

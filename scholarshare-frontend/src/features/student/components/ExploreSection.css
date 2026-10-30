@@ -1,0 +1,92 @@
+.sd-filter-row {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  max-width: 760px;
+  margin-bottom: 28px;
+}
+
+.sd-search {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  min-height: 50px;
+  padding: 0 16px;
+  background: #fff;
+  border: 1px solid var(--sd-border);
+  border-radius: var(--sd-radius-control);
+  font-size: 20px;
+  color: var(--sd-slate);
+  transition: border-color var(--sd-ease), box-shadow var(--sd-ease);
+}
+
+.sd-search:hover {
+  border-color: var(--sd-light);
+}
+
+.sd-search:focus-within {
+  border-color: var(--sd-pink);
+  box-shadow: 0 0 0 3px rgb(179 65 114 / 0.12);
+}
+
+.sd-search input {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+/* The search box shows the focus ring itself, so its inner input needs none. */
+.student-app .sd-search input:focus-visible {
+  outline: 0;
+}
+
+.sd-filter-row select {
+  min-height: 50px;
+  padding: 0 16px;
+  background: #fff;
+  border: 1px solid var(--sd-border);
+  border-radius: var(--sd-radius-control);
+  color: var(--ink);
+  font-size: 14px;
+  transition: border-color var(--sd-ease);
+}
+
+.sd-filter-row select:hover {
+  border-color: var(--sd-light);
+}
+
+.sd-research-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 560px) {
+  .sd-research-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 780px) {
+  .sd-research-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1020px) {
+  .sd-research-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .sd-filter-row {
+    flex-direction: column;
+  }
+}

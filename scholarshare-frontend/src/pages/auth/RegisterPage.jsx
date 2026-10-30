@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import FormField from "../../components/formField/FormField";
 import { useAuth } from "../../hooks/useAuth";
@@ -7,9 +7,9 @@ import "./AuthPage.css";
 
 function RegisterPage() {
   const { register } = useAuth();
-  const navigate = useNavigate();
 
   const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [submittedEmail, setSubmittedEmail] = useState(null);
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -23,14 +23,32 @@ function RegisterPage() {
     setIsSubmitting(true);
 
     try {
-      await register(form);
-      navigate("/", { replace: true });
+      const { user } = await register(form);
+      setSubmittedEmail(user.email);
     } catch (err) {
       setError(err.message ?? "Registration failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // After a successful sign-up the account is PENDING: explain what happens next.
+  if (submittedEmail) {
+    return (
+      <div className="auth-page">
+        <div className="auth-card">
+          <h1>Registration submitted</h1>
+          <p className="subtitle">
+            Thank you! An administrator will review <strong>{submittedEmail}</strong>. You can sign
+            in after your account is approved, and you will find the result in your notifications.
+          </p>
+          <p className="auth-switch">
+            <Link to="/login">Go to sign in</Link>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="auth-page">
@@ -69,6 +87,7 @@ function RegisterPage() {
             type="password"
             autoComplete="new-password"
             minLength={8}
+            maxLength={72}
             required
             value={form.password}
             onChange={handleChange}

@@ -4,12 +4,14 @@
   flex-direction: column;
   border-radius: 20px;
   min-height: 380px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  background: #fff;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 
 .research-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 12px 25px #0001;
+  box-shadow: var(--shadow-lift);
+  border-color: var(--gold);
 }
 
 .card-top {
@@ -44,7 +46,7 @@
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 1.4px;
-  color: #4172b3;
+  color: var(--blue);
 }
 
 .card-body h3 {
@@ -65,4 +67,19 @@
   display: flex;
   justify-content: space-between;
   font-size: 12px;
+}
+
+/* The arrow nudges forward when the card is hovered. */
+.card-body footer b {
+  transition: transform var(--ease);
+}
+
+.research-card:hover .card-body footer b {
+  transform: translateX(4px);
+}
+
+.research-card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
 }

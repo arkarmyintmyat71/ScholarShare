@@ -1,73 +1,81 @@
+# Base configuration. Contains NO secrets: they come from environment variables
+# (or from the git-ignored application-local.yaml used while developing).
+#
+# Required environment variables when not using the "local" profile:
+#   DB_PASSWORD, JWT_SECRET   (optional: DB_URL, DB_USERNAME, CORS_ORIGINS...)
+
 spring:
   application:
     name: scholarshare-backend
+
+  profiles:
+    default: local        # no profile given -> loads application-local.yaml
+
   datasource:
-    url: jdbc:mysql://localhost:3306/scholarshare_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: root
-    password: Ark@r122181
+    url: ${DB_URL:jdbc:mysql://localhost:3306/scholarshare_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: ${DDL_AUTO:update}   # use "validate" + a migration tool (Flyway) in production
+    show-sql: false
     open-in-view: false
     properties:
       hibernate:
-        format_sql: true
         jdbc:
           time_zone: UTC
-
-  #  jackson:
-  #    time-zone: UTC
-  #    serialization:
-  #      write-dates-as-timestamps: false
 
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 20MB
 
-    security:
-     oauth2:
-       client:
-         registration:
-           google:
-             client-id: ${GOOGLE_CLIENT_ID}
-             client-secret: ${GOOGLE_CLIENT_SECRET}
-             scope:
-               - email
-               - profile
+  # Google sign-in is not implemented yet. When it is, add (note: under spring.security,
+  # NOT under spring.servlet) and set GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET:
+  #
+  # spring:
+  #   security:
+  #     oauth2:
+  #       client:
+  #         registration:
+  #           google:
+  #             client-id: ${GOOGLE_CLIENT_ID}
+  #             client-secret: ${GOOGLE_CLIENT_SECRET}
+  #             scope: [email, profile]
 
 server:
   port: 8080
   servlet:
-    context-path: /api
+    context-path: /api     # every URL below starts with /api  (e.g. POST /api/auth/login)
 
 logging:
   level:
     root: INFO
-    org.springframework.security: INFO
-    org.hibernate.SQL: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info
   endpoint:
     health:
-      show-details: always
+      show-details: never
 
 jwt:
-  secret: oY9ISzMqyrSljCQcebeyrY70rZwp+wKuETagneodNzM=
-  expiration: 86400000            # access accessToken, 24 hours (milliseconds)
-  refresh-expiration: 604800000   # refresh accessToken, 7 days (milliseconds)
+  secret: ${JWT_SECRET}            # at least 32 characters
+  expiration: 86400000             # access token lifetime: 24 hours (milliseconds)
 
 app:
-  upload-dir: uploads
   cors:
+    # Origins allowed to call the API from a browser. Not needed in dev when the
+    # frontend uses the Vite proxy, but required for a deployed frontend.
     allowed-origins:
       - http://localhost:3000
       - http://localhost:5173
+  seed-admin:
+    enabled: false                 # creates the first ADMIN account on startup when true
+    name: Administrator
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}

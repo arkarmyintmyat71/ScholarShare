@@ -1,29 +1,62 @@
 import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
+
+import { useAuth } from "../../../hooks/useAuth";
+import ConfirmDialog from "../../confirmDialog/ConfirmDialog";
+import { ROUTES } from "../../../config/constants";
+import { homeRouteForUser } from "../../../utils/roles";
 import "./Navbar.css";
 
+// Links that point at a section of the home page use `hash`.
 const NAV_LINKS = [
-  { label: "Explore Research", to: "/explore" },
-  { label: "Categories", to: "/categories" },
-  { label: "Topics", to: "/topics" },
-  { label: "About", to: "/about" },
+  { label: "Explore Research", to: ROUTES.home, hash: "#explore" },
+  { label: "Categories", to: ROUTES.categories },
+  { label: "Topics", to: ROUTES.topics },
+  { label: "About", to: ROUTES.home, hash: "#about" },
 ];
 
-// NavLink's className/style callbacks receive { isActive }, so this
-// just toggles an "active" class instead of always applying one —
-// keeps App.css/Navbar.css in charge of what "active" looks like.
 const navLinkClassName = ({ isActive }) => (isActive ? "active" : undefined);
 const registerClassName = ({ isActive }) => (isActive ? "register active" : "register");
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isConfirmingSignOut, setIsConfirmingSignOut] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
+  const location = useLocation();
 
   const closeMenu = () => setIsMenuOpen(false);
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
+  const askToSignOut = () => {
+    closeMenu();
+    setIsConfirmingSignOut(true);
+  };
+
+  // Sign in / Register for guests; Dashboard / Sign out for signed-in users.
+  // Rendered twice (top bar on desktop, menu panel on mobile) so it lives in a function.
+  const renderAuthActions = () =>
+    isAuthenticated ? (
+      <>
+        <NavLink to={homeRouteForUser(user)} className={navLinkClassName} onClick={closeMenu}>
+          My dashboard
+        </NavLink>
+        <button type="button" className="sign-out-btn" onClick={askToSignOut}>
+          Sign out
+        </button>
+      </>
+    ) : (
+      <>
+        <NavLink to={ROUTES.login} className={navLinkClassName} onClick={closeMenu}>
+          Sign In
+        </NavLink>
+        <NavLink to={ROUTES.register} className={registerClassName} onClick={closeMenu}>
+          Register for free
+        </NavLink>
+      </>
+    );
 
   return (
     <header className="site-header">
-      <Link to="/" className="brand" onClick={closeMenu}>
+      <Link to={ROUTES.home} className="brand" onClick={closeMenu}>
         <span className="brand-mark" aria-hidden="true">S</span>
 
         <span className="brand-content">
@@ -32,16 +65,7 @@ const Navbar = () => {
         </span>
       </Link>
 
-      {/* Desktop-only auth actions — hidden below the tablet breakpoint
-          so they never compete with the brand/hamburger for space. */}
-      <div className="auth-links">
-        <NavLink to="/login" className={navLinkClassName}>
-          Sign In
-        </NavLink>
-        <NavLink to="/register" className={registerClassName}>
-          Register for free
-        </NavLink>
-      </div>
+      <div className="auth-links">{renderAuthActions()}</div>
 
       <button
         type="button"
@@ -63,24 +87,33 @@ const Navbar = () => {
         className={`main-nav ${isMenuOpen ? "open" : ""}`}
         aria-label="Main navigation"
       >
-        {NAV_LINKS.map(({ label, to }) => (
-          <NavLink key={to} to={to} className={navLinkClassName} onClick={closeMenu}>
-            {label}
-          </NavLink>
-        ))}
+        {NAV_LINKS.map(({ label, to, hash }) => {
+          // NavLink can't tell "/#explore" from "/#about", so work out "active" by hand.
+          const isActive = location.pathname === to && (hash ? location.hash === hash : true);
+          return (
+            <Link
+              key={label}
+              to={{ pathname: to, hash }}
+              className={isActive ? "active" : undefined}
+              onClick={closeMenu}
+            >
+              {label}
+            </Link>
+          );
+        })}
 
-        {/* Same auth actions, restyled for the off-canvas panel — this
-            is what actually fixes Sign In disappearing on small
-            screens, instead of squeezing it into the top bar. */}
-        <div className="mobile-auth">
-          <NavLink to="/login" className={navLinkClassName} onClick={closeMenu}>
-            Sign In
-          </NavLink>
-          <NavLink to="/register" className={registerClassName} onClick={closeMenu}>
-            Register for free
-          </NavLink>
-        </div>
+        <div className="mobile-auth">{renderAuthActions()}</div>
       </nav>
+
+      {isConfirmingSignOut && (
+        <ConfirmDialog
+          title="Sign out of ScholarShare?"
+          message="You'll need to sign in again to share research and see your saved items."
+          confirmLabel="Sign out"
+          onConfirm={logout}
+          onCancel={() => setIsConfirmingSignOut(false)}
+        />
+      )}
     </header>
   );
 };

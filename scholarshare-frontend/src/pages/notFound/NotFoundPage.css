@@ -18,9 +18,18 @@
   max-width: 40ch;
 }
 
-.not-found-btn {
+.not-found-btn,
+.light-btn.not-found-btn {
   margin-top: 16px;
   background: var(--orange);
+  border-color: var(--orange);
+  color: #fff;
+}
+
+.light-btn.not-found-btn:hover,
+.light-btn.not-found-btn:focus-visible {
+  background: var(--orange-hover);
+  border-color: var(--orange-hover);
   color: #fff;
 }
 

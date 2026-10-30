@@ -1,0 +1,91 @@
+/* This block spans the page like the main site's, so the section padding is only vertical. */
+.sd-section-flush {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.sd-path {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  margin: 0 var(--space-section-x);
+  padding: clamp(32px, 5vw, 70px) 6%;
+  background: var(--navy);
+  border-radius: var(--sd-radius-panel);
+  color: #fff;
+}
+
+.sd-path .sd-eyebrow {
+  color: var(--gold);
+}
+
+.sd-path h2 {
+  font: 500 var(--font-h2) / 1.12 Georgia, serif;
+}
+
+.sd-path p {
+  margin-top: 18px;
+  line-height: 1.6;
+  color: #dce4e9;
+}
+
+.sd-subject-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-content: center;
+}
+
+.sd-subject-list button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 8px;
+  border: 0;
+  border-bottom: 1px solid #61707a;
+  background: transparent;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: left;
+  transition: color var(--sd-ease), padding-left var(--sd-ease);
+}
+
+.sd-subject-list button span {
+  transition: transform var(--sd-ease);
+}
+
+.sd-subject-list button:hover,
+.sd-subject-list button:focus-visible {
+  color: var(--gold);
+  padding-left: 14px;
+}
+
+.sd-subject-list button:hover span,
+.sd-subject-list button:focus-visible span {
+  transform: translateX(4px);
+}
+
+/* The default focus ring is pink; on navy use the gold highlight instead. */
+.student-app .sd-subject-list button:focus-visible {
+  outline-color: var(--gold);
+}
+
+@media (min-width: 780px) {
+  .sd-path {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.sd-subject-list button i {
+  margin-right: 6px;
+  font-style: normal;
+  opacity: 0.8;
+}
+
+.sd-subject-list button small {
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.14);
+  font-size: 12px;
+}

@@ -1,0 +1,132 @@
+.profile-menu {
+  position: relative;
+}
+
+.profile-trigger {
+  display: grid;
+  place-items: center;
+  padding: 3px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+
+.profile-trigger:hover,
+.profile-trigger:focus-visible,
+.profile-trigger.is-open {
+  border-color: var(--sd-pink);
+}
+
+.profile-trigger.is-open {
+  box-shadow: 0 0 0 3px rgb(179 65 114 / 0.15);
+}
+
+.profile-trigger:active {
+  transform: scale(0.94);
+}
+
+.profile-panel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 30;
+  width: min(320px, calc(100vw - 24px));
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--sd-border);
+  border-radius: 20px;
+  box-shadow: var(--sd-shadow-pop);
+  transform-origin: top right;
+  animation: sd-pop 0.15s ease;
+}
+
+.profile-summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px;
+  border-bottom: 1px solid var(--sd-border);
+}
+
+.profile-summary-text {
+  min-width: 0;
+}
+
+.profile-summary-text strong,
+.profile-summary-text span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-summary-text strong {
+  font-size: 16px;
+}
+
+.profile-summary-text span {
+  margin-top: 3px;
+  color: var(--sd-slate);
+  font-size: 13px;
+}
+
+.profile-links {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+}
+
+.profile-links-last {
+  border-top: 1px solid var(--sd-border);
+}
+
+.profile-links a,
+.profile-links button {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--sd-navy);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  transition: background-color 0.15s, color 0.15s, transform 0.1s;
+}
+
+.profile-links a:hover,
+.profile-links button:hover,
+.profile-links a:focus-visible,
+.profile-links button:focus-visible {
+  background: var(--sd-cream);
+  color: var(--sd-pink);
+  outline: 0;
+}
+
+.profile-links a:active,
+.profile-links button:active {
+  transform: scale(0.98);
+}
+
+.profile-links span {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  font-size: 18px;
+}
+
+
+/* On phones the avatar isn't at the screen edge, so span the screen instead of hanging off the avatar. */
+@media (max-width: 560px) {
+  .profile-panel {
+    position: fixed;
+    top: 76px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+  }
+}

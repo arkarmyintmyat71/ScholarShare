@@ -1,0 +1,132 @@
+.sd-two-col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 780px) {
+  .sd-two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.sd-panel h3 {
+  font: 600 clamp(20px, 2.4vw, 25px) / 1.15 Georgia, serif;
+}
+
+.sd-status-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 16px;
+}
+
+/* Status chips: pill shape, orange when selected (like the main nav's "active"). */
+.sd-status-tab {
+  padding: 9px 14px;
+  background: #fff;
+  border: 1px solid var(--sd-border);
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  transition: background-color var(--sd-ease), border-color var(--sd-ease), color var(--sd-ease), transform 0.1s;
+}
+
+.sd-status-tab:hover {
+  border-color: var(--sd-pink);
+  color: var(--sd-pink);
+}
+
+.sd-status-tab:active {
+  transform: scale(0.96);
+}
+
+.sd-status-tab.active {
+  background: var(--sd-pink);
+  border-color: var(--sd-pink);
+  color: #fff;
+}
+
+.sd-status-tab span {
+  margin-left: 4px;
+  padding: 2px 8px;
+  background: rgb(0 0 0 / 0.08);
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+.sd-status-tab.active span {
+  background: rgb(255 255 255 / 0.25);
+}
+
+.sd-item-list {
+  display: grid;
+  gap: 4px;
+}
+
+.sd-list-item {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--sd-border);
+}
+
+.sd-list-item:last-child {
+  border-bottom: 0;
+}
+
+.sd-list-item strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.sd-list-item small {
+  display: block;
+  color: #555;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.sd-list-item button {
+  margin-top: 10px;
+  padding: 8px 14px;
+  background: #fff;
+  border: 1px solid var(--sd-border);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  transition: background-color var(--sd-ease), color var(--sd-ease), border-color var(--sd-ease), transform 0.1s;
+}
+
+.sd-list-item button:hover {
+  border-color: var(--sd-pink);
+  color: var(--sd-pink);
+}
+
+.sd-list-item button:active {
+  transform: scale(0.96);
+}
+
+.sd-status-label.pending {
+  color: #9b6512;
+}
+
+.sd-status-label.approved {
+  color: #167449;
+}
+
+.sd-status-label.rejected {
+  color: #b23b55;
+}
+
+.sd-list-item a {
+  display: inline-block;
+  margin: 8px 12px 0 0;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--sd-blue);
+  text-decoration: none;
+}
+
+.sd-list-item a:hover {
+  color: var(--sd-pink);
+}

@@ -1,0 +1,11 @@
+# Copy to application-local.yaml (git-ignored) and fill in your own values.
+spring:
+  datasource:
+    password: YOUR_DB_PASSWORD
+jwt:
+  secret: AT_LEAST_32_RANDOM_CHARACTERS_HERE   # e.g. output of: openssl rand -base64 32
+app:
+  seed-admin:
+    enabled: true
+    email: admin@scholarshare.com
+    password: CHOOSE_A_STRONG_PASSWORD

@@ -1,36 +1,24 @@
 import httpClient from "./api/httpClient";
-
-const TOKEN_KEY = "scholarshare_token";
+import { STORAGE_KEYS } from "../config/constants";
 
 /**
- * Expected Java backend contract (adjust to match your real API):
+ * POST /auth/login     { email, password }        -> { accessToken, user }
+ * POST /auth/register  { name, email, password }  -> user (status PENDING, no token: an admin must approve first)
+ * GET  /auth/me                                   -> user
  *
- *   POST /api/auth/login    { email, password }  -> { token, user }
- *   POST /api/auth/register { name, email, password } -> { token, user }
- *   GET  /api/auth/me       (Authorization: Bearer <token>) -> user
- *
- * Where `user` is whatever shape your backend returns, e.g.
- *   { id, name, email, role }
+ * user = { id, name, email, pictureUrl, role: "STUDENT" | "ADMIN", accountStatus, createdAt }
  */
 
 export async function login({ email, password }) {
   const { data } = await httpClient.post("/auth/login", { email, password });
-  if (data?.token) {
-    localStorage.setItem(TOKEN_KEY, data.token);
-  }
-  return data;
+  localStorage.setItem(STORAGE_KEYS.token, data.accessToken);
+  return data.user;
 }
 
+// Does NOT sign anyone in. Resolves with the pending user and the server's message.
 export async function register({ name, email, password }) {
-  const { data } = await httpClient.post("/auth/register", {
-    name,
-    email,
-    password,
-  });
-  if (data?.token) {
-    localStorage.setItem(TOKEN_KEY, data.token);
-  }
-  return data;
+  const response = await httpClient.post("/auth/register", { name, email, password });
+  return { user: response.data, message: response.message };
 }
 
 export async function fetchCurrentUser() {
@@ -39,9 +27,9 @@ export async function fetchCurrentUser() {
 }
 
 export function logout() {
-  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(STORAGE_KEYS.token);
 }
 
 export function getToken() {
-  return localStorage.getItem(TOKEN_KEY);
+  return localStorage.getItem(STORAGE_KEYS.token);
 }
