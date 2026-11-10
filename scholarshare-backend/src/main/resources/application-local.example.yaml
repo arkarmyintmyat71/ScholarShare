@@ -5,6 +5,8 @@ spring:
 jwt:
   secret: AT_LEAST_32_RANDOM_CHARACTERS_HERE   # e.g. output of: openssl rand -base64 32
 app:
+  google:
+    client-id: YOUR_ID.apps.googleusercontent.com   # Google sign-in; see README
   seed-admin:
     enabled: true
     email: admin@scholarshare.com

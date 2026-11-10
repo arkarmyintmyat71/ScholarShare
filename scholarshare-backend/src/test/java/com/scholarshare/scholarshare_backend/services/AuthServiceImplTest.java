@@ -6,15 +6,14 @@ import com.scholarshare.scholarshare_backend.dto.responses.LoginResponse;
 import com.scholarshare.scholarshare_backend.dto.responses.UserResponse;
 import com.scholarshare.scholarshare_backend.entities.User;
 import com.scholarshare.scholarshare_backend.entities.enums.AccountStatus;
-import com.scholarshare.scholarshare_backend.entities.enums.NotificationType;
 import com.scholarshare.scholarshare_backend.entities.enums.Provider;
-import com.scholarshare.scholarshare_backend.entities.enums.RelatedEntityType;
 import com.scholarshare.scholarshare_backend.entities.enums.Role;
 import com.scholarshare.scholarshare_backend.exceptions.AccountNotActiveException;
 import com.scholarshare.scholarshare_backend.exceptions.ApiException;
 import com.scholarshare.scholarshare_backend.exceptions.InvalidCredentialsException;
 import com.scholarshare.scholarshare_backend.mappers.UserMapper;
 import com.scholarshare.scholarshare_backend.repositories.UserRepo;
+import com.scholarshare.scholarshare_backend.securities.GoogleTokenVerifier;
 import com.scholarshare.scholarshare_backend.securities.JwtTokenProvider;
 import com.scholarshare.scholarshare_backend.services.implementation.AuthServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,9 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,7 +42,7 @@ class AuthServiceImplTest {
     @Mock UserRepo userRepo;
     @Mock JwtTokenProvider jwtTokenProvider;
     @Mock UserMapper userMapper;
-    @Mock NotificationPublisher notifications;
+    @Mock GoogleTokenVerifier googleVerifier;
 
     // Real encoder (cheap strength) so we test actual hash matching.
     final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(4);
@@ -55,7 +51,7 @@ class AuthServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        authService = new AuthServiceImpl(userRepo, passwordEncoder, jwtTokenProvider, userMapper, notifications);
+        authService = new AuthServiceImpl(userRepo, passwordEncoder, jwtTokenProvider, userMapper, googleVerifier);
     }
 
     private User localUser(AccountStatus status) {
@@ -65,7 +61,7 @@ class AuthServiceImplTest {
     }
 
     private UserResponse response(Long id, String name, String email, AccountStatus status) {
-        return new UserResponse(id, name, email, null, Role.STUDENT, status, null);
+        return new UserResponse(id, name, email, null, Role.STUDENT, status, null, null, null, null, null, null);
     }
 
     @Test
@@ -95,39 +91,38 @@ class AuthServiceImplTest {
     }
 
     @Test
-    void login_pendingRejectedAndDisabledAccountsGet403WithTheirStatus() {
-        for (AccountStatus status : new AccountStatus[]{AccountStatus.PENDING, AccountStatus.REJECTED, AccountStatus.DISABLED}) {
-            when(userRepo.findByEmail("may@uni.edu")).thenReturn(Optional.of(localUser(status)));
+    void login_disabledAccountGets403WithItsStatus() {
+        when(userRepo.findByEmail("may@uni.edu")).thenReturn(Optional.of(localUser(AccountStatus.DISABLED)));
 
-            Throwable thrown = catchThrowable(() -> authService.login(new LoginRequest("may@uni.edu", "password123")));
+        Throwable thrown = catchThrowable(() -> authService.login(new LoginRequest("may@uni.edu", "password123")));
 
-            assertThat(thrown).isInstanceOf(AccountNotActiveException.class);
-            ApiException api = (ApiException) thrown;
-            assertThat(api.getStatus()).isEqualTo(HttpStatus.FORBIDDEN);
-            assertThat(api.getData()).hasToString("{accountStatus=" + status.name() + "}");
-        }
+        assertThat(thrown).isInstanceOf(AccountNotActiveException.class);
+        ApiException api = (ApiException) thrown;
+        assertThat(api.getStatus()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(api.getData()).hasToString("{accountStatus=DISABLED}");
     }
 
     @Test
-    void login_pendingAccountWithWrongPasswordStillLooksLikeBadCredentials() {
-        when(userRepo.findByEmail("may@uni.edu")).thenReturn(Optional.of(localUser(AccountStatus.PENDING)));
+    void login_disabledAccountWithWrongPasswordStillLooksLikeBadCredentials() {
+        when(userRepo.findByEmail("may@uni.edu")).thenReturn(Optional.of(localUser(AccountStatus.DISABLED)));
 
         assertThatThrownBy(() -> authService.login(new LoginRequest("may@uni.edu", "wrong-password")))
                 .isInstanceOf(InvalidCredentialsException.class);
     }
 
     @Test
-    void register_createsPendingStudentWithHashedPasswordAndNotifiesAdmins() {
+    void register_createsActiveStudentWithHashedPasswordAndSignsIn() {
         when(userRepo.existsByEmail("new@uni.edu")).thenReturn(false);
         when(userRepo.save(any(User.class))).thenAnswer(inv -> {
             User u = inv.getArgument(0);
             u.setId(7L);
             return u;
         });
+        when(jwtTokenProvider.generateToken(any(User.class))).thenReturn("jwt");
         when(userMapper.toUserResponse(any(User.class)))
-                .thenReturn(response(7L, "New", "new@uni.edu", AccountStatus.PENDING));
+                .thenReturn(response(7L, "New", "new@uni.edu", AccountStatus.APPROVED));
 
-        authService.register(new RegisterRequest(" New ", "New@Uni.edu", "password123"));
+        LoginResponse result = authService.register(new RegisterRequest(" New ", "New@Uni.edu", "password123"));
 
         ArgumentCaptor<User> saved = ArgumentCaptor.forClass(User.class);
         verify(userRepo).save(saved.capture());
@@ -135,12 +130,10 @@ class AuthServiceImplTest {
         assertThat(user.getEmail()).isEqualTo("new@uni.edu");
         assertThat(user.getName()).isEqualTo("New");
         assertThat(user.getRole()).isEqualTo(Role.STUDENT);
-        assertThat(user.getAccountStatus()).isEqualTo(AccountStatus.PENDING);
+        assertThat(user.getAccountStatus()).isEqualTo(AccountStatus.APPROVED);   // no admin approval
         assertThat(user.getPasswordHash()).isNotEqualTo("password123");
         assertThat(passwordEncoder.matches("password123", user.getPasswordHash())).isTrue();
-
-        verify(notifications).toAdmins(eq(NotificationType.REGISTRATION_SUBMITTED), anyString(),
-                eq(RelatedEntityType.USER), eq(7L));
+        assertThat(result.accessToken()).isEqualTo("jwt");
     }
 
     @Test
@@ -151,6 +144,5 @@ class AuthServiceImplTest {
                 .isInstanceOf(ApiException.class)
                 .extracting(e -> ((ApiException) e).getStatus()).isEqualTo(HttpStatus.CONFLICT);
         verify(userRepo, never()).save(any());
-        verify(notifications, never()).toAdmins(any(), anyString(), any(), anyLong());
     }
 }

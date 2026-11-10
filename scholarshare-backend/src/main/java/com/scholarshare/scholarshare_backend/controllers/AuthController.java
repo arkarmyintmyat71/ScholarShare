@@ -1,5 +1,6 @@
 package com.scholarshare.scholarshare_backend.controllers;
 
+import com.scholarshare.scholarshare_backend.dto.requests.GoogleLoginRequest;
 import com.scholarshare.scholarshare_backend.dto.requests.LoginRequest;
 import com.scholarshare.scholarshare_backend.dto.requests.RegisterRequest;
 import com.scholarshare.scholarshare_backend.dto.responses.ApiResponse;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Real URLs (context path /api): /api/auth/login, /api/auth/register, /api/auth/me. */
+/** Real URLs (context path /api): /api/auth/login, register, google, me. */
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -32,11 +33,17 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok("Login successful", authService.login(request)));
     }
 
-    /** Creates a PENDING account. There is no token: the student signs in after an admin approves. */
+    /** Google sign-in: the browser sends the Google ID token, the server verifies it and answers like /login. */
+    @PostMapping("/google")
+    public ResponseEntity<ApiResponse<LoginResponse>> google(@Valid @RequestBody GoogleLoginRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok("Login successful", authService.loginWithGoogle(request.idToken())));
+    }
+
+    /** Creates a student account. No approval step: the answer already holds the token, like a login. */
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<UserResponse>> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<ApiResponse<LoginResponse>> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(
-                "Registration submitted. You can sign in after an administrator approves your account.",
+                "Account created",
                 authService.register(request)));
     }
 

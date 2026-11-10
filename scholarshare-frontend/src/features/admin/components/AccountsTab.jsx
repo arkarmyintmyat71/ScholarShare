@@ -1,26 +1,24 @@
 import { useState } from "react";
 
+import UserAvatar from "../../../components/account/UserAvatar";
 import Pagination from "../../../components/pagination/Pagination";
 import StatusBlock from "../../../components/StatusBlock";
 import { PAGE_SIZE } from "../../../config/constants";
 import { useAsync } from "../../../hooks/useAsync";
 import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
-import {
-  approveUser,
-  disableUser,
-  getPendingUsers,
-  getUsers,
-  rejectUser,
-} from "../../../services/adminService";
+import { disableUser, enableUser, getUsers } from "../../../services/adminService";
 import { capitalize, dateText } from "../../../utils/format";
-import ReviewActions from "./ReviewActions";
+import Icon from "../../../components/shell/Icons";
 
-const STATUS_FILTERS = ["", "PENDING", "APPROVED", "REJECTED", "DISABLED"];
+const STATUS_FILTERS = [
+  { value: "", label: "All" },
+  { value: "APPROVED", label: "Active" },
+  { value: "DISABLED", label: "Disabled" },
+];
 
-// Registrations waiting for a decision, and the list of every account (with a status filter).
+// Every account (with a status filter). Students join without approval; an admin can disable or re-enable them.
 function AccountsTab() {
-  const pending = useAsync(getPendingUsers, []);
-  const [version, setVersion] = useState(0); // bumps to reload the "all accounts" list too
+  const [version, setVersion] = useState(0); // bumps to reload the list
 
   const [status, setStatus] = useState("");
   const [query, setQuery] = useState("");
@@ -34,13 +32,12 @@ function AccountsTab() {
   const [busyId, setBusyId] = useState(null);
   const [actionError, setActionError] = useState(null);
 
-  // Runs one admin action, then refreshes both lists. The server's message is shown if it fails.
+  // Runs one admin action, then refreshes the list. The server's message is shown if it fails.
   const run = async (id, action) => {
     setActionError(null);
     setBusyId(id);
     try {
       await action();
-      pending.reload();
       setVersion((v) => v + 1);
     } catch (err) {
       setActionError(err.message);
@@ -49,90 +46,81 @@ function AccountsTab() {
     }
   };
 
-  const pendingList = pending.data ?? [];
   const userList = users.data?.content ?? [];
 
   return (
     <>
-      {actionError && <p className="pg-message error" role="alert" style={{ marginBottom: 14 }}>{actionError}</p>}
+      {actionError && <p className="ui-alert" role="alert">{actionError}</p>}
 
-      <section className="pg-card">
-        <h2>Waiting for approval ({pendingList.length})</h2>
-        <StatusBlock isLoading={pending.isLoading && !pending.data} error={pending.error} onRetry={pending.reload} />
-        {pending.data && pendingList.length === 0 && <p className="pg-empty">No registrations are waiting.</p>}
-        <ul className="pg-list">
-          {pendingList.map((u) => (
-            <li key={u.id} className="pg-list-item">
-              <div>
-                <strong>{u.name}</strong>
-                <small>{u.email} · registered {dateText(u.createdAt)}</small>
-              </div>
-              <ReviewActions
-                disabled={busyId === u.id}
-                onApprove={() => run(u.id, () => approveUser(u.id))}
-                onReject={(reason) => run(u.id, () => rejectUser(u.id, reason))}
-              />
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="pg-card">
-        <h2>All accounts</h2>
-        <div className="pg-filters" style={{ gridTemplateColumns: "2fr 1fr" }}>
-          <input
-            type="search"
-            placeholder="Search name or e-mail"
-            aria-label="Search accounts"
-            value={query}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setPage(0);
-            }}
-          />
-          <select
-            aria-label="Filter by status"
-            value={status}
-            onChange={(event) => {
-              setStatus(event.target.value);
-              setPage(0);
-            }}
-          >
-            {STATUS_FILTERS.map((s) => (
-              <option key={s} value={s}>{s ? capitalize(s.toLowerCase()) : "Any status"}</option>
+      <section className="ui-card flush">
+        <div className="ui-toolbar">
+          <label className="ui-search">
+            <Icon name="search" size={18} />
+            <input
+              type="search"
+              placeholder="Search name or e-mail"
+              aria-label="Search accounts"
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setPage(0);
+              }}
+            />
+          </label>
+          <div className="ui-chips" role="group" aria-label="Filter by status">
+            {STATUS_FILTERS.map((f) => (
+              <button
+                key={f.value}
+                type="button"
+                className={status === f.value ? "on" : ""}
+                aria-pressed={status === f.value}
+                onClick={() => {
+                  setStatus(f.value);
+                  setPage(0);
+                }}
+              >
+                {f.label}
+              </button>
             ))}
-          </select>
+          </div>
         </div>
 
         <StatusBlock isLoading={users.isLoading && !users.data} error={users.error} onRetry={users.reload} />
-        {users.data && userList.length === 0 && <p className="pg-empty">No accounts match.</p>}
-        <ul className="pg-list">
-          {userList.map((u) => (
-            <li key={u.id} className="pg-list-item">
-              <div>
-                <strong>
-                  {u.name} <span className={`pg-badge ${u.accountStatus.toLowerCase()}`}>{capitalize(u.accountStatus.toLowerCase())}</span>{" "}
-                  {u.role === "ADMIN" && <span className="pg-badge">Admin</span>}
-                </strong>
-                <small>{u.email} · joined {dateText(u.createdAt)}</small>
-              </div>
-              <div className="pg-row-actions">
-                {u.accountStatus === "APPROVED" && u.role !== "ADMIN" && (
-                  <button type="button" className="pg-btn danger small" disabled={busyId === u.id}
-                    onClick={() => run(u.id, () => disableUser(u.id))}>
-                    Disable
-                  </button>
-                )}
-                {(u.accountStatus === "DISABLED" || u.accountStatus === "REJECTED") && (
-                  <button type="button" className="pg-btn secondary small" disabled={busyId === u.id}
-                    onClick={() => run(u.id, () => approveUser(u.id))}>
-                    Approve
-                  </button>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
+        {users.data && userList.length === 0 && <p className="ui-empty">No accounts match.</p>}
+
+        {userList.length > 0 && (
+          <ul className="ui-rows">
+            {userList.map((u) => (
+              <li key={u.id} className="ui-row">
+                <UserAvatar name={u.name} pictureUrl={u.pictureUrl} size={44} />
+                <div className="ui-row-main">
+                  <strong>
+                    {u.name} {u.role === "ADMIN" && <span className="ui-pill navy">Admin</span>}
+                  </strong>
+                  <small>{u.email}</small>
+                </div>
+                <span className="ui-row-meta">Joined {dateText(u.createdAt)}</span>
+                <span className={`ui-pill ${u.accountStatus === "APPROVED" ? "green" : "red"}`}>
+                  {u.accountStatus === "APPROVED" ? "Active" : capitalize(u.accountStatus.toLowerCase())}
+                </span>
+                <div className="ui-row-actions">
+                  {u.accountStatus === "APPROVED" && u.role !== "ADMIN" && (
+                    <button type="button" className="ui-btn danger sm" disabled={busyId === u.id}
+                      onClick={() => run(u.id, () => disableUser(u.id))}>
+                      Disable
+                    </button>
+                  )}
+                  {u.accountStatus === "DISABLED" && (
+                    <button type="button" className="ui-btn ghost sm" disabled={busyId === u.id}
+                      onClick={() => run(u.id, () => enableUser(u.id))}>
+                      Enable
+                    </button>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
         <Pagination page={page} totalPages={users.data?.totalPages} onChange={setPage} />
       </section>
     </>

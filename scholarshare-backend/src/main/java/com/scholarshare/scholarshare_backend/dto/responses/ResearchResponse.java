@@ -15,6 +15,8 @@ public record ResearchResponse(
         String description,
         Long categoryId,
         String categoryName,
+        String categoryImageUrl,
+        String imageUrl,
         Integer academicYear,
         ResearchStatus status,
         String fileName,
@@ -23,6 +25,9 @@ public record ResearchResponse(
         Long uploadedById,
         String uploadedByName,
         Instant uploadedAt,
-        Instant reviewedAt
+        Instant reviewedAt,
+        Double ratingAverage,
+        Long ratingCount,
+        Long commentCount
 ) {
 }

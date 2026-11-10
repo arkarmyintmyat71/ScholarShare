@@ -1,0 +1,21 @@
+.rb-grid {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 560px) {
+  .rb-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1020px) {
+  .rb-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1500px) {
+  .rb-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

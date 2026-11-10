@@ -4,8 +4,9 @@ import { getBookmarks, removeBookmark, saveBookmark } from "../../../services/bo
 
 // The student's saved research (GET /bookmarks). Saving/removing updates the screen
 // straight away and is undone if the server refuses.
-export function useBookmarks() {
-  const { data, setData, error } = useAsync(getBookmarks, []);
+// Pass enabled=false for visitors who are not students (they have no saved list).
+export function useBookmarks(enabled = true) {
+  const { data, setData, error } = useAsync(getBookmarks, [], { enabled });
   const saved = useMemo(() => data ?? [], [data]);
   const savedIds = useMemo(() => new Set(saved.map((r) => r.id)), [saved]);
 

@@ -3,7 +3,8 @@ import { STORAGE_KEYS } from "../config/constants";
 
 /**
  * POST /auth/login     { email, password }        -> { accessToken, user }
- * POST /auth/register  { name, email, password }  -> user (status PENDING, no token: an admin must approve first)
+ * POST /auth/register  { name, email, password }  -> { accessToken, user }   (no approval step: the account works at once)
+ * POST /auth/google    { idToken }                -> { accessToken, user }   (same as login; a new Google user is created and signed in at once)
  * GET  /auth/me                                   -> user
  *
  * user = { id, name, email, pictureUrl, role: "STUDENT" | "ADMIN", accountStatus, createdAt }
@@ -11,14 +12,21 @@ import { STORAGE_KEYS } from "../config/constants";
 
 export async function login({ email, password }) {
   const { data } = await httpClient.post("/auth/login", { email, password });
-  localStorage.setItem(STORAGE_KEYS.token, data.accessToken);
+  setToken(data.accessToken);
   return data.user;
 }
 
-// Does NOT sign anyone in. Resolves with the pending user and the server's message.
+export async function loginWithGoogle(idToken) {
+  const { data } = await httpClient.post("/auth/google", { idToken });
+  setToken(data.accessToken);
+  return data.user;
+}
+
+// Creates the account and signs the student in (same answer as login).
 export async function register({ name, email, password }) {
-  const response = await httpClient.post("/auth/register", { name, email, password });
-  return { user: response.data, message: response.message };
+  const { data } = await httpClient.post("/auth/register", { name, email, password });
+  setToken(data.accessToken);
+  return data.user;
 }
 
 export async function fetchCurrentUser() {
@@ -28,6 +36,10 @@ export async function fetchCurrentUser() {
 
 export function logout() {
   localStorage.removeItem(STORAGE_KEYS.token);
+}
+
+export function setToken(token) {
+  localStorage.setItem(STORAGE_KEYS.token, token);
 }
 
 export function getToken() {

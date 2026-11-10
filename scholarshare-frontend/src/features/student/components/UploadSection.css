@@ -95,3 +95,28 @@
   background: rgb(179 65 114 / 0.1);
   color: #8f2d57;
 }
+
+/* "Other" category: the name box and the photo picker with a small preview. */
+.sd-photo-pick {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sd-photo-pick img {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  margin-top: 6px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid var(--sd-border);
+}
+
+.sd-form .sd-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--sd-slate);
+}

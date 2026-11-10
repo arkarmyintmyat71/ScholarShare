@@ -6,18 +6,16 @@ import com.scholarshare.scholarshare_backend.dto.responses.LoginResponse;
 import com.scholarshare.scholarshare_backend.dto.responses.UserResponse;
 import com.scholarshare.scholarshare_backend.entities.User;
 import com.scholarshare.scholarshare_backend.entities.enums.AccountStatus;
-import com.scholarshare.scholarshare_backend.entities.enums.NotificationType;
 import com.scholarshare.scholarshare_backend.entities.enums.Provider;
-import com.scholarshare.scholarshare_backend.entities.enums.RelatedEntityType;
 import com.scholarshare.scholarshare_backend.entities.enums.Role;
 import com.scholarshare.scholarshare_backend.exceptions.AccountNotActiveException;
 import com.scholarshare.scholarshare_backend.exceptions.ApiException;
 import com.scholarshare.scholarshare_backend.exceptions.InvalidCredentialsException;
 import com.scholarshare.scholarshare_backend.mappers.UserMapper;
 import com.scholarshare.scholarshare_backend.repositories.UserRepo;
+import com.scholarshare.scholarshare_backend.securities.GoogleTokenVerifier;
 import com.scholarshare.scholarshare_backend.securities.JwtTokenProvider;
 import com.scholarshare.scholarshare_backend.services.AuthService;
-import com.scholarshare.scholarshare_backend.services.NotificationPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,7 +36,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserMapper userMapper;
-    private final NotificationPublisher notifications;
+    private final GoogleTokenVerifier googleVerifier;
 
     @Override
     @Transactional(readOnly = true)
@@ -57,7 +55,7 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidCredentialsException(BAD_CREDENTIALS);
         }
 
-        // Checked after the password so a stranger can't probe which accounts are pending or disabled.
+        // Checked after the password so a stranger can't probe which accounts are disabled.
         if (user.getAccountStatus() != AccountStatus.APPROVED) {
             throw new AccountNotActiveException(user.getAccountStatus());
         }
@@ -67,7 +65,34 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public UserResponse register(RegisterRequest request) {
+    public LoginResponse loginWithGoogle(String idToken) {
+        GoogleTokenVerifier.GoogleProfile google = googleVerifier.verify(idToken);
+        String email = normalize(google.email());
+
+        User user = userRepo.findByEmail(email).orElse(null);
+        if (user == null) {
+            String name = google.name() == null || google.name().isBlank() ? email : google.name().trim();
+            user = userRepo.save(User.builder()
+                    .name(name.length() > 100 ? name.substring(0, 100) : name)
+                    .email(email)
+                    .role(Role.STUDENT)
+                    .provider(Provider.GOOGLE)
+                    .googleId(google.sub())
+                    .accountStatus(AccountStatus.APPROVED)    // same rule as sign-up: usable at once
+                    .build());
+        } else if (user.getGoogleId() == null) {
+            user.setGoogleId(google.sub());                   // an existing account now also works with Google
+        }
+
+        if (user.getAccountStatus() != AccountStatus.APPROVED) {
+            throw new AccountNotActiveException(user.getAccountStatus());
+        }
+        return new LoginResponse(jwtTokenProvider.generateToken(user), userMapper.toUserResponse(user));
+    }
+
+    @Override
+    @Transactional
+    public LoginResponse register(RegisterRequest request) {
         String email = normalize(request.getEmail());
 
         if (userRepo.existsByEmail(email)) {
@@ -80,14 +105,10 @@ public class AuthServiceImpl implements AuthService {
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(Role.STUDENT)                       // admins are never created through sign-up
                 .provider(Provider.LOCAL)
-                .accountStatus(AccountStatus.PENDING)     // an admin must approve before the first login
+                .accountStatus(AccountStatus.APPROVED)    // no admin approval: the student can use the account at once
                 .build());
 
-        notifications.toAdmins(NotificationType.REGISTRATION_SUBMITTED,
-                user.getName() + " has registered and is waiting for approval.",
-                RelatedEntityType.USER, user.getId());
-
-        return userMapper.toUserResponse(user);
+        return new LoginResponse(jwtTokenProvider.generateToken(user), userMapper.toUserResponse(user));
     }
 
     private String normalize(String email) {

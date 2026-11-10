@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useAsync } from "../../../hooks/useAsync";
-import { getMyResearch, uploadResearch } from "../../../services/researchService";
+import { deleteResearch, getMyResearch, updateResearch, uploadResearch } from "../../../services/researchService";
 import { UPLOAD_STATUSES } from "../data/studentContent";
 
 // The student's own submissions (GET /research/mine). New ones start PENDING;
@@ -19,6 +19,24 @@ export function useUploads() {
     [setData]
   );
 
+  // Edit one of the student's own files. It goes back to PENDING, so the list is refreshed from the server's answer.
+  const edit = useCallback(
+    async (id, details) => {
+      const saved = await updateResearch(id, details);
+      setData((prev) => (prev ?? []).map((u) => (u.id === id ? saved : u)));
+      return saved;
+    },
+    [setData]
+  );
+
+  const remove = useCallback(
+    async (id) => {
+      await deleteResearch(id);
+      setData((prev) => (prev ?? []).filter((u) => u.id !== id));
+    },
+    [setData]
+  );
+
   const counts = useMemo(
     () =>
       Object.fromEntries(
@@ -27,5 +45,5 @@ export function useUploads() {
     [uploads]
   );
 
-  return { uploads, upload, counts, isLoading, error };
+  return { uploads, upload, edit, remove, counts, isLoading, error };
 }

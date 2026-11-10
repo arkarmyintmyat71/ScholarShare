@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-import { researchPath } from "../../../config/constants";
+import { researchEditPath, researchPath } from "../../../config/constants";
 import { capitalize, countText } from "../../../utils/format";
 import { UPLOAD_STATUSES } from "../data/studentContent";
 import "./MyLibrarySection.css";
@@ -55,6 +55,7 @@ function MyLibrarySection({ uploads, counts, isLoading, saved, onRemoveSaved }) 
                   <b className={`sd-status-label ${label}`}>{capitalize(label)}</b> · {u.fileName}
                 </small>
                 <Link to={researchPath(u.id)}>View details</Link>
+                <Link to={researchEditPath(u.id)}>Edit</Link>
               </div>
             ))}
           </div>

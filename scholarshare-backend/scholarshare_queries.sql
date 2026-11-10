@@ -3,7 +3,7 @@
 --  Plain text. Run it with:   mysql -u root -p < scholarshare_queries.sql
 --  (or paste it into MySQL Workbench and run all).
 --
---  PART 1  schema   : the 6 thesis tables (Table 3.6.x) + "bookmarks"
+--  PART 1  schema   : the 14 tables: users, categories, research_files, topics, comments, notifications, bookmarks, research_ratings, research_comments, research_comment_likes, user_avatars, category_images, research_images
 --  PART 2  sample data : admin, students, categories, research files, topics...
 --  PART 3  queries  : the same queries the Spring Boot API runs, to try by hand
 --
@@ -16,8 +16,8 @@
 --      may@uni.edu              Student@123    (STUDENT, approved)
 --      aung@uni.edu             Student@123    (STUDENT, approved)
 --      pann@uni.edu             Student@123    (STUDENT, approved)
---      zaw@uni.edu              Student@123    (STUDENT, PENDING  -> cannot log in yet)
---      hnin@uni.edu             Student@123    (STUDENT, REJECTED -> cannot log in)
+--      zaw@uni.edu              Student@123    (STUDENT, active)
+--      hnin@uni.edu             Student@123    (STUDENT, DISABLED -> cannot log in)
 -- =====================================================================
 
 
@@ -35,10 +35,14 @@ CREATE TABLE users (
     email           VARCHAR(150) NOT NULL,
     password_hash   VARCHAR(255) NULL,                       -- NULL for Google accounts
     picture_url     VARCHAR(255) NULL,
+    headline        VARCHAR(110) NULL,                       -- profile page: short headline
+    bio             VARCHAR(420) NULL,
+    university      VARCHAR(90)  NULL,
+    location        VARCHAR(90)  NULL,
     role            VARCHAR(20)  NOT NULL,                   -- STUDENT | ADMIN
     provider        VARCHAR(20)  NOT NULL DEFAULT 'LOCAL',   -- LOCAL | GOOGLE
     google_id       VARCHAR(255) NULL,
-    account_status  VARCHAR(20)  NOT NULL,                   -- PENDING | APPROVED | REJECTED | DISABLED
+    account_status  VARCHAR(20)  NOT NULL,                   -- APPROVED | DISABLED (sign-up needs no approval)
     created_at      DATETIME(6)  NOT NULL,
     updated_at      DATETIME(6)  NOT NULL,
     PRIMARY KEY (id),
@@ -46,13 +50,14 @@ CREATE TABLE users (
     UNIQUE KEY uk_users_google_id (google_id),
     KEY idx_users_status (account_status),
     CONSTRAINT chk_users_role   CHECK (role IN ('STUDENT','ADMIN')),
-    CONSTRAINT chk_users_status CHECK (account_status IN ('PENDING','APPROVED','REJECTED','DISABLED'))
+    CONSTRAINT chk_users_status CHECK (account_status IN ('APPROVED','DISABLED'))
 ) ENGINE=InnoDB;
 
 -- 3.6.2 categories -----------------------------------------------------
 CREATE TABLE categories (
     id    BIGINT       NOT NULL AUTO_INCREMENT,
     name  VARCHAR(100) NOT NULL,
+    image_url VARCHAR(255) NULL,                -- "/categories/3/image?v=..." (photo bytes are in category_images)
     PRIMARY KEY (id),
     UNIQUE KEY uk_categories_name (name)
 ) ENGINE=InnoDB;
@@ -68,6 +73,7 @@ CREATE TABLE research_files (
     file_name      VARCHAR(255)  NOT NULL,
     content_type   VARCHAR(100)  NOT NULL,
     file_size      BIGINT        NOT NULL,
+    image_url      VARCHAR(255)  NULL,                       -- "/research/3/image?v=..." when the student added a picture (bytes are in research_images)
     file_data      LONGBLOB      NOT NULL,
     uploaded_by    BIGINT        NOT NULL,
     uploaded_at    DATETIME(6)   NOT NULL,
@@ -112,9 +118,9 @@ CREATE TABLE comments (
 CREATE TABLE notifications (
     id                   BIGINT       NOT NULL AUTO_INCREMENT,
     recipient_id         BIGINT       NOT NULL,
-    type                 VARCHAR(40)  NOT NULL,  -- REGISTRATION_SUBMITTED | REGISTRATION_RESULT | FILE_SUBMITTED | FILE_RESULT | NEW_COMMENT
+    type                 VARCHAR(40)  NOT NULL,  -- FILE_SUBMITTED | FILE_RESULT | NEW_COMMENT
     message              VARCHAR(255) NOT NULL,
-    related_entity_type  VARCHAR(30)  NULL,      -- USER | RESEARCH_FILE | TOPIC
+    related_entity_type  VARCHAR(30)  NULL,      -- RESEARCH_FILE | TOPIC
     related_entity_id    BIGINT       NULL,
     is_read              TINYINT(1)   NOT NULL DEFAULT 0,
     created_at           DATETIME(6)  NOT NULL,
@@ -123,7 +129,7 @@ CREATE TABLE notifications (
     CONSTRAINT fk_notifications_user FOREIGN KEY (recipient_id) REFERENCES users (id)
 ) ENGINE=InnoDB;
 
--- extra table: "Save" button on research cards (not in the thesis tables)
+-- extra tables for the buttons on a research card: Save, Rate, Comment
 CREATE TABLE bookmarks (
     id                BIGINT      NOT NULL AUTO_INCREMENT,
     user_id           BIGINT      NOT NULL,
@@ -136,18 +142,86 @@ CREATE TABLE bookmarks (
 ) ENGINE=InnoDB;
 
 
+CREATE TABLE research_ratings (
+    id                BIGINT      NOT NULL AUTO_INCREMENT,
+    user_id           BIGINT      NOT NULL,
+    research_file_id  BIGINT      NOT NULL,
+    stars             INT         NOT NULL,                  -- 1 to 5
+    created_at        DATETIME(6) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_research_ratings (user_id, research_file_id),
+    KEY idx_research_ratings_file (research_file_id),
+    CONSTRAINT fk_ratings_user     FOREIGN KEY (user_id)          REFERENCES users (id),
+    CONSTRAINT fk_ratings_research FOREIGN KEY (research_file_id) REFERENCES research_files (id),
+    CONSTRAINT chk_ratings_stars   CHECK (stars BETWEEN 1 AND 5)
+) ENGINE=InnoDB;
+
+CREATE TABLE research_comments (
+    id                BIGINT        NOT NULL AUTO_INCREMENT,
+    research_file_id  BIGINT        NOT NULL,
+    body              VARCHAR(1000) NOT NULL,
+    created_by        BIGINT        NOT NULL,
+    created_at        DATETIME(6)   NOT NULL,
+    PRIMARY KEY (id),
+    KEY idx_research_comments_file (research_file_id, created_at),
+    CONSTRAINT fk_rcomments_research FOREIGN KEY (research_file_id) REFERENCES research_files (id),
+    CONSTRAINT fk_rcomments_user     FOREIGN KEY (created_by)       REFERENCES users (id)
+) ENGINE=InnoDB;
+
+
+CREATE TABLE research_comment_likes (
+    id          BIGINT      NOT NULL AUTO_INCREMENT,
+    user_id     BIGINT      NOT NULL,
+    comment_id  BIGINT      NOT NULL,
+    created_at  DATETIME(6) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_research_comment_likes (user_id, comment_id),
+    CONSTRAINT fk_clikes_user    FOREIGN KEY (user_id)    REFERENCES users (id),
+    CONSTRAINT fk_clikes_comment FOREIGN KEY (comment_id) REFERENCES research_comments (id)
+) ENGINE=InnoDB;
+
+-- Photo bytes live in their own tables so list queries never read them.
+CREATE TABLE user_avatars (
+    user_id       BIGINT      NOT NULL,         -- same value as users.id
+    content_type  VARCHAR(50) NOT NULL,
+    data          LONGBLOB    NOT NULL,
+    PRIMARY KEY (user_id),
+    CONSTRAINT fk_avatar_user FOREIGN KEY (user_id) REFERENCES users (id)
+) ENGINE=InnoDB;
+
+CREATE TABLE category_images (
+    category_id   BIGINT      NOT NULL,         -- same value as categories.id
+    content_type  VARCHAR(50) NOT NULL,
+    data          LONGBLOB    NOT NULL,
+    PRIMARY KEY (category_id),
+    CONSTRAINT fk_catimg_category FOREIGN KEY (category_id) REFERENCES categories (id)
+) ENGINE=InnoDB;
+
+CREATE TABLE research_images (
+    research_file_id  BIGINT      NOT NULL,         -- same value as research_files.id
+    content_type      VARCHAR(50) NOT NULL,
+    data              LONGBLOB    NOT NULL,
+    PRIMARY KEY (research_file_id),
+    CONSTRAINT fk_resimg_research FOREIGN KEY (research_file_id) REFERENCES research_files (id)
+) ENGINE=InnoDB;
+
 -- =====================================================================
 -- PART 2  -  SAMPLE DATA
 -- =====================================================================
 
--- users: id 1 = admin, 2-4 approved students, 5 pending, 6 rejected
+-- users: id 1 = admin, 2-5 active students, 6 disabled
 INSERT INTO users (id, name, email, password_hash, role, provider, account_status, created_at, updated_at) VALUES
  (1, 'Administrator', 'admin@scholarshare.com', '$2a$12$NuPNTY.lDxUGfkFs.4AsFu6/lxe5Fo0h8YoXHwCGd5hAwaZf1HrGu', 'ADMIN',   'LOCAL', 'APPROVED', NOW(6), NOW(6)),
  (2, 'May Thiri',     'may@uni.edu',  '$2a$12$EGdJFhCJQHtU9lLeKTWovOT..bVCdhwCoP6dTZI9uJA.nVlAttqoq', 'STUDENT', 'LOCAL', 'APPROVED', NOW(6), NOW(6)),
  (3, 'Aung Min',      'aung@uni.edu', '$2a$12$EGdJFhCJQHtU9lLeKTWovOT..bVCdhwCoP6dTZI9uJA.nVlAttqoq', 'STUDENT', 'LOCAL', 'APPROVED', NOW(6), NOW(6)),
  (4, 'Pann Ei',       'pann@uni.edu', '$2a$12$EGdJFhCJQHtU9lLeKTWovOT..bVCdhwCoP6dTZI9uJA.nVlAttqoq', 'STUDENT', 'LOCAL', 'APPROVED', NOW(6), NOW(6)),
- (5, 'Zaw Lin',       'zaw@uni.edu',  '$2a$12$EGdJFhCJQHtU9lLeKTWovOT..bVCdhwCoP6dTZI9uJA.nVlAttqoq', 'STUDENT', 'LOCAL', 'PENDING',  NOW(6), NOW(6)),
- (6, 'Hnin Su',       'hnin@uni.edu', '$2a$12$EGdJFhCJQHtU9lLeKTWovOT..bVCdhwCoP6dTZI9uJA.nVlAttqoq', 'STUDENT', 'LOCAL', 'REJECTED', NOW(6), NOW(6));
+ (5, 'Zaw Lin',       'zaw@uni.edu',  '$2a$12$EGdJFhCJQHtU9lLeKTWovOT..bVCdhwCoP6dTZI9uJA.nVlAttqoq', 'STUDENT', 'LOCAL', 'APPROVED', NOW(6), NOW(6)),
+ (6, 'Hnin Su',       'hnin@uni.edu', '$2a$12$EGdJFhCJQHtU9lLeKTWovOT..bVCdhwCoP6dTZI9uJA.nVlAttqoq', 'STUDENT', 'LOCAL', 'DISABLED', NOW(6), NOW(6));
+
+UPDATE users SET headline = 'Computer Science learner · Building ideas worth sharing.',
+    bio = 'Passionate about technology, research and helping students learn together.',
+    university = 'Rangsit University', location = 'Pathum Thani, Thailand'
+WHERE id = 2;
 
 INSERT INTO categories (id, name) VALUES
  (1, 'Computer Science'),
@@ -196,7 +270,6 @@ INSERT INTO comments (id, topic_id, body, created_by, created_at) VALUES
  (4, 3, 'A simple spreadsheet with one row per source helped me a lot.', 2, NOW(6) - INTERVAL 20 HOUR);
 
 INSERT INTO notifications (recipient_id, type, message, related_entity_type, related_entity_id, is_read, created_at) VALUES
- (1, 'REGISTRATION_SUBMITTED', 'Zaw Lin has registered and is waiting for approval.', 'USER', 5, 0, NOW(6) - INTERVAL 2 DAY),
  (1, 'FILE_SUBMITTED', 'Aung Min uploaded "Cloud Services for University IT Departments" for review.', 'RESEARCH_FILE', 5, 0, NOW(6) - INTERVAL 1 DAY),
  (2, 'FILE_RESULT', 'Your file "Full-Stack Web Application Development" was approved.', 'RESEARCH_FILE', 1, 1, NOW(6) - INTERVAL 9 DAY),
  (2, 'FILE_RESULT', 'Your file "Data Analytics for Student Learning" was approved.', 'RESEARCH_FILE', 4, 0, NOW(6) - INTERVAL 3 DAY),
@@ -208,6 +281,23 @@ INSERT INTO bookmarks (user_id, research_file_id, created_at) VALUES
  (2, 2, NOW(6) - INTERVAL 2 DAY),
  (2, 3, NOW(6) - INTERVAL 1 DAY);
 
+INSERT INTO research_ratings (user_id, research_file_id, stars, created_at) VALUES
+ (2, 2, 4, NOW(6) - INTERVAL 2 DAY),
+ (2, 3, 5, NOW(6) - INTERVAL 1 DAY),
+ (3, 1, 5, NOW(6) - INTERVAL 5 DAY),
+ (4, 1, 4, NOW(6) - INTERVAL 4 DAY),
+ (4, 2, 4, NOW(6) - INTERVAL 3 DAY);
+
+INSERT INTO research_comments (research_file_id, body, created_by, created_at) VALUES
+ (1, 'Very clear explanation of the REST layer, thank you for sharing.', 3, NOW(6) - INTERVAL 4 DAY),
+ (1, 'Could you add a section about testing?', 4, NOW(6) - INTERVAL 3 DAY),
+ (2, 'This helped me with my own literature review.', 2, NOW(6) - INTERVAL 2 DAY);
+
+INSERT INTO research_comment_likes (user_id, comment_id, created_at) VALUES
+ (2, 1, NOW(6) - INTERVAL 3 DAY),
+ (4, 1, NOW(6) - INTERVAL 3 DAY),
+ (3, 3, NOW(6) - INTERVAL 1 DAY);
+
 
 -- =====================================================================
 -- PART 3  -  USEFUL QUERIES  (what the API runs; ? = a value you type)
@@ -217,18 +307,18 @@ INSERT INTO bookmarks (user_id, research_file_id, created_at) VALUES
 -- POST /api/auth/login : find the account by e-mail (password is checked in Java with BCrypt)
 SELECT id, name, email, role, account_status FROM users WHERE email = 'may@uni.edu';
 
--- POST /api/auth/register : a new student always starts as PENDING
+-- POST /api/auth/register : a new student is active at once (no admin approval)
 -- INSERT INTO users (name, email, password_hash, role, provider, account_status, created_at, updated_at)
--- VALUES ('New Student', 'new@uni.edu', '<bcrypt hash>', 'STUDENT', 'LOCAL', 'PENDING', NOW(6), NOW(6));
+-- VALUES ('New Student', 'new@uni.edu', '<bcrypt hash>', 'STUDENT', 'LOCAL', 'APPROVED', NOW(6), NOW(6));
 
 -- ---- Admin: accounts ------------------------------------------------
--- GET /api/admin/users/pending
-SELECT id, name, email, created_at FROM users WHERE account_status = 'PENDING' ORDER BY created_at;
-
--- PUT /api/admin/users/{id}/approve   (reject / disable work the same way)
--- UPDATE users SET account_status = 'APPROVED', updated_at = NOW(6) WHERE id = 5;
--- UPDATE users SET account_status = 'REJECTED', updated_at = NOW(6) WHERE id = 5;
+-- PUT /api/admin/users/{id}/disable   and   /enable
 -- UPDATE users SET account_status = 'DISABLED', updated_at = NOW(6) WHERE id = 5;
+-- UPDATE users SET account_status = 'APPROVED', updated_at = NOW(6) WHERE id = 5;
+
+-- Upgrading a database made before sign-up approval was removed (run once):
+-- UPDATE users SET account_status = 'APPROVED' WHERE account_status IN ('PENDING','REJECTED');
+-- DELETE FROM notifications WHERE type IN ('REGISTRATION_SUBMITTED','REGISTRATION_RESULT');
 
 -- GET /api/admin/users?status=APPROVED&q=may
 SELECT id, name, email, role, account_status, created_at
@@ -240,7 +330,10 @@ ORDER BY created_at DESC;
 -- ---- Research: public search (never loads file_data) ---------------
 -- GET /api/research?q=security&categoryId=4&year=2024&page=0&size=9
 SELECT r.id, r.title, r.description, c.name AS category, r.academic_year,
-       r.file_name, r.file_size, u.name AS uploaded_by, r.uploaded_at
+       r.file_name, r.file_size, u.name AS uploaded_by, r.uploaded_at,
+       (SELECT ROUND(AVG(rt.stars), 1) FROM research_ratings rt WHERE rt.research_file_id = r.id) AS rating_average,
+       (SELECT COUNT(*) FROM research_ratings rt WHERE rt.research_file_id = r.id) AS rating_count,
+       (SELECT COUNT(*) FROM research_comments rc WHERE rc.research_file_id = r.id) AS comment_count
 FROM research_files r
 JOIN categories c ON c.id = r.category_id
 JOIN users u      ON u.id = r.uploaded_by
@@ -322,10 +415,51 @@ SELECT research_file_id FROM bookmarks WHERE user_id = 2;                       
 -- INSERT IGNORE INTO bookmarks (user_id, research_file_id, created_at) VALUES (2, 4, NOW(6));   -- PUT    /api/bookmarks/4
 -- DELETE FROM bookmarks WHERE user_id = 2 AND research_file_id = 4;                              -- DELETE /api/bookmarks/4
 
+-- ---- Ratings (1 to 5 stars) and comments on research (signed-in students only) -----
+SELECT research_file_id, stars FROM research_ratings WHERE user_id = 2;                        -- GET /api/ratings
+-- Give or change a rating (one per student per research):                                    -- PUT /api/ratings/4  {"rating":5}
+-- INSERT INTO research_ratings (user_id, research_file_id, stars, created_at) VALUES (2, 4, 5, NOW(6))
+--   ON DUPLICATE KEY UPDATE stars = 5;
+-- DELETE FROM research_ratings WHERE user_id = 2 AND research_file_id = 4;                     -- DELETE /api/ratings/4
+
+-- Average and number of ratings per research
+SELECT research_file_id, ROUND(AVG(stars), 1) AS average, COUNT(*) AS total FROM research_ratings GROUP BY research_file_id;
+
+-- GET /api/research/{id}/comments  (caller = user 2)
+SELECT c.id, c.body, u.id AS user_id, u.name, u.picture_url, c.created_at,
+       (SELECT COUNT(*) FROM research_comment_likes cl WHERE cl.comment_id = c.id)                  AS like_count,
+       (SELECT COUNT(*) FROM research_comment_likes cl WHERE cl.comment_id = c.id AND cl.user_id = 2) AS liked_by_me
+FROM research_comments c JOIN users u ON u.id = c.created_by
+WHERE c.research_file_id = 1 ORDER BY c.created_at;
+-- POST /api/research/{id}/comments : INSERT INTO research_comments (research_file_id, body, created_by, created_at) VALUES (1, '...', 2, NOW(6));
+-- PUT  /api/research-comments/{id}/like : INSERT IGNORE INTO research_comment_likes (user_id, comment_id, created_at) VALUES (2, 1, NOW(6));
+
+-- ---- Account, photo, category photo -------------------------------------------
+-- PUT /api/users/me           : UPDATE users SET name = 'New Name' WHERE id = 2;
+-- PUT /api/users/me/email     : UPDATE users SET email = 'new@uni.edu' WHERE id = 2;   (needs the current password; returns a new token)
+-- PUT /api/users/me/password  : UPDATE users SET password_hash = '<bcrypt>' WHERE id = 2;
+-- POST /api/users/me/avatar   : REPLACE INTO user_avatars ...;  UPDATE users SET picture_url = '/users/2/avatar?v=...' WHERE id = 2;
+-- DELETE /api/users/me/avatar : DELETE FROM user_avatars WHERE user_id = 2;  UPDATE users SET picture_url = NULL WHERE id = 2;
+
+-- A student chose "Other" and typed a category: reuse it when the name exists (case-insensitive), else create it
+SELECT id FROM categories WHERE LOWER(name) = LOWER('Marine Biology');
+-- INSERT INTO categories (name, image_url) VALUES ('Marine Biology', NULL);
+
+-- DELETE /api/research/{id}   (owner or admin) removes everything that points at the research first:
+-- DELETE FROM research_comment_likes WHERE comment_id IN (SELECT id FROM research_comments WHERE research_file_id = 1);
+-- DELETE FROM research_comments WHERE research_file_id = 1;
+-- DELETE FROM research_ratings  WHERE research_file_id = 1;
+-- DELETE FROM bookmarks         WHERE research_file_id = 1;
+-- DELETE FROM research_images   WHERE research_file_id = 1;
+-- DELETE FROM research_files    WHERE id = 1;
+
+-- PUT /api/research/{id}   (owner edits) -> back to the review queue
+-- UPDATE research_files SET title='...', description='...', category_id=1, academic_year=2026,
+--        status='PENDING', reviewed_by=NULL, reviewed_at=NULL WHERE id = 1 AND uploaded_by = 2;
+
 -- ---- Dashboard numbers ----------------------------------------------------
 -- GET /api/admin/stats
 SELECT
-  (SELECT COUNT(*) FROM users WHERE account_status = 'PENDING')                       AS pending_accounts,
   (SELECT COUNT(*) FROM users WHERE role = 'STUDENT' AND account_status = 'APPROVED') AS active_students,
   (SELECT COUNT(*) FROM research_files WHERE status = 'PENDING')                      AS pending_research,
   (SELECT COUNT(*) FROM research_files WHERE status = 'APPROVED')                     AS approved_research,
@@ -335,6 +469,14 @@ SELECT
 SELECT c.name, COUNT(r.id) AS approved_files
 FROM categories c LEFT JOIN research_files r ON r.category_id = c.id AND r.status = 'APPROVED'
 GROUP BY c.id, c.name ORDER BY approved_files DESC;
+
+-- ---- Keep your existing data and only add what is new (instead of re-running PART 1) ---
+-- (Hibernate's ddl-auto=update does the same automatically; run these by hand if you prefer.)
+-- ALTER TABLE categories     ADD COLUMN image_url VARCHAR(255) NULL;
+-- ALTER TABLE users ADD COLUMN headline VARCHAR(110) NULL, ADD COLUMN bio VARCHAR(420) NULL,
+--                   ADD COLUMN university VARCHAR(90) NULL, ADD COLUMN location VARCHAR(90) NULL;   -- profile page details (Hibernate ddl-auto=update adds them by itself)
+-- then copy the CREATE TABLE statements of research_ratings, research_comment_likes, user_avatars, category_images and research_images from PART 1, and add the column: ALTER TABLE research_files ADD COLUMN image_url VARCHAR(255) NULL;
+-- (the old table password_reset_tokens is no longer used: DROP TABLE IF EXISTS password_reset_tokens;)
 
 -- ---- If you keep your OLD database instead of re-running PART 1 ----------
 -- UPDATE users SET role = 'STUDENT'  WHERE role = 'USER';

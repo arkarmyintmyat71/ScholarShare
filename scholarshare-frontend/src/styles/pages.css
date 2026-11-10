@@ -91,7 +91,7 @@
   min-height: 40px;
   padding: 0 20px;
   border: 1px solid var(--orange);
-  border-radius: 999px;
+  border-radius: var(--radius-control);
   background: var(--orange);
   color: #fff;
   font: inherit;
@@ -209,6 +209,11 @@
 @media (min-width: 700px) {
   .pg-filters {
     grid-template-columns: 2fr 1.2fr 0.8fr auto;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    box-shadow: 0 8px 22px #1c375b0d;
   }
 }
 
@@ -413,3 +418,28 @@ a.pg-stat:hover {
   color: var(--muted);
   font-size: 14px;
 }
+
+/* ---- research detail: rating row and the "sign in" box shown to visitors ---- */
+.pg-engage {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.pg-lock {
+  margin-top: 22px;
+  padding: 18px 20px;
+  border: 1px dashed var(--gold);
+  border-radius: 14px;
+  background: var(--cream);
+}
+
+.pg-lock strong {
+  color: var(--navy);
+}
+
+.pg-lock p {
+  margin-top: 6px;
+  color: var(--muted);
+}
+.profile-head + .pg-message { margin-top: 14px; }

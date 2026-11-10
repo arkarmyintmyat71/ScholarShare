@@ -1,24 +1,24 @@
-/* Same card as the main site: 20px corners, lifts on hover, photo zooms. */
+/* Same card as the public site (components/researchCard/ResearchCard.css) plus the Rate · Comment · Save row. */
 .sd-card {
   display: flex;
   flex-direction: column;
-  min-height: 380px;
+  overflow: hidden;
   background: #fff;
-  border: 1px solid #cfcfcf;
+  border: 1px solid var(--sd-border);
   border-radius: var(--sd-radius-card);
+  box-shadow: 0 8px 22px #1c375b0d;
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 
 .sd-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
   box-shadow: var(--sd-shadow-lift);
-  border-color: var(--sd-light);
+  border-color: #a9b9cf;
 }
 
 .sd-card-photo {
-  height: 160px;
+  height: 170px;
   overflow: hidden;
-  border-radius: var(--sd-radius-card);
   background: #dce7f5;
 }
 
@@ -30,100 +30,76 @@
 }
 
 .sd-card:hover .sd-card-photo img {
-  transform: scale(1.045);
+  transform: scale(1.05);
 }
 
 .sd-card-body {
   display: flex;
   flex: 1;
   flex-direction: column;
-  padding: 22px;
+  padding: 18px 20px 14px;
 }
 
 .sd-card-tag {
-  font-size: 10px;
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e6edf7;
+  font-size: 10.5px;
   font-weight: 800;
-  letter-spacing: 1.4px;
+  letter-spacing: 1.2px;
   color: var(--sd-blue);
 }
 
 .sd-card h3 {
-  margin: 14px 0;
-  font: 600 clamp(19px, 2.2vw, 23px) / 1.15 Georgia, serif;
+  margin: 12px 0 8px;
+  font: 600 clamp(18px, 2vw, 21px) / 1.2 Georgia, serif;
 }
 
 .sd-card p {
-  margin-bottom: 20px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 12px;
   font-size: 14px;
   line-height: 1.55;
-  color: #555;
-}
-
-.sd-card-actions {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 2px;
-  margin-top: auto;
-  padding-top: 14px;
-  border-top: 1px solid #ddd;
-}
-
-/* Pill buttons that fill on hover and press in on click. */
-.sd-action {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 8px 9px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: #555;
-  font-size: 12.5px;
-  font-weight: 700;
-  white-space: nowrap;
-  transition: background-color var(--sd-ease), color var(--sd-ease), transform 0.1s;
-}
-
-.sd-action:hover {
-  background: var(--sd-cream);
-  color: var(--sd-navy);
-}
-
-.sd-action:active {
-  transform: scale(0.95);
-}
-
-.sd-action small {
-  display: inline;
-  margin-left: 5px;
-  padding: 1px 7px;
-  border-radius: 999px;
-  background: var(--sd-cream);
-  font-size: 11px;
-  letter-spacing: 0;
-  color: inherit;
-}
-
-.sd-action.is-reacted,
-.sd-save.saved {
-  background: rgb(179 65 114 / 0.1);
-  color: var(--sd-pink);
-}
-
-.sd-save.saved svg {
-  fill: currentColor;
+  color: #4b5b73;
 }
 
 .sd-card-meta {
   display: block;
-  margin: -8px 0 18px;
+  margin-bottom: 14px;
   font-size: 12px;
   font-weight: 700;
   color: var(--sd-slate);
 }
 
-a.sd-action {
+.sd-card-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding: 12px 2px;
+  border-top: 1px solid #e3eaf3;
+  color: var(--sd-pink);
+  font-size: 14px;
+  font-weight: 700;
   text-decoration: none;
-  color: inherit;
+  transition: padding var(--ease);
+}
+
+.sd-card-detail:hover {
+  padding-inline: 6px;
+}
+
+.sd-card-actions {
+  position: relative; /* the rating popover opens upwards, over the card */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2px;
+  padding-top: 6px;
+  border-top: 1px solid #e3eaf3;
 }

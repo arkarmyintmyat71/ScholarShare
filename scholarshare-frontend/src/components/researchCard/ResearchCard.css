@@ -1,25 +1,24 @@
+/* Public research card. The student card (features/student/components/StudentResearchCard.css) looks the same. */
 .research-card {
-  border: 1px solid #cfcfcf;
   display: flex;
   flex-direction: column;
-  border-radius: 20px;
-  min-height: 380px;
+  height: 100%;
+  overflow: hidden;
   background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 8px 22px #1c375b0d;
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 
 .research-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-lift);
-  border-color: var(--gold);
+  border-color: #a9b9cf;
 }
 
 .card-top {
-  border-radius: 20px;
-  height: 160px;
-  display: grid;
-  place-items: center;
-  font: 800 28px Georgia;
+  height: 170px;
   overflow: hidden;
   background: #dce7f5;
 }
@@ -32,44 +31,53 @@
 }
 
 .research-card:hover .photo-top img {
-  transform: scale(1.045);
+  transform: scale(1.05);
 }
 
 .card-body {
-  padding: 22px;
   display: flex;
-  flex-direction: column;
   flex: 1;
+  flex-direction: column;
+  padding: 18px 20px 20px;
 }
 
 .card-body > span {
-  font-size: 10px;
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e6edf7;
+  font-size: 10.5px;
   font-weight: 800;
-  letter-spacing: 1.4px;
+  letter-spacing: 1.2px;
   color: var(--blue);
 }
 
 .card-body h3 {
-  font: 600 clamp(19px, 2.2vw, 23px) / 1.15 Georgia;
-  margin: 14px 0;
+  margin: 12px 0 8px;
+  font: 600 clamp(18px, 2vw, 21px) / 1.2 Georgia, serif;
+  color: var(--ink);
 }
 
 .card-body p {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   font-size: 14px;
   line-height: 1.55;
-  color: #555;
+  color: #4b5b73;
 }
 
 .card-body footer {
-  margin-top: auto;
-  padding-top: 22px;
-  border-top: 1px solid #ddd;
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  margin-top: auto;
+  padding-top: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--orange);
 }
 
-/* The arrow nudges forward when the card is hovered. */
 .card-body footer b {
   transition: transform var(--ease);
 }
@@ -80,6 +88,7 @@
 
 .research-card-link {
   display: block;
+  height: 100%;
   color: inherit;
   text-decoration: none;
 }

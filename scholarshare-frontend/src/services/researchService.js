@@ -6,7 +6,7 @@ import httpClient from "./api/httpClient";
  *
  * GET  /research?q&categoryId&year&page&size  -> { content, page, size, totalElements, totalPages }   (public, approved only)
  * GET  /research/{id}                         -> research
- * GET  /research/{id}/download                -> the file
+ * GET  /research/{id}/download                -> the file (signed in only)
  * GET  /research/mine                         -> [research]   (the signed-in student's uploads, any status)
  * POST /research (multipart)                  -> research     (status PENDING)
  */
@@ -35,17 +35,39 @@ export async function getMyResearch() {
   return data;
 }
 
-export async function uploadResearch({ title, description, categoryId, academicYear, file }) {
+// Builds the multipart body shared by "submit" and "edit".
+//   category: pass categoryId for an existing category, or newCategoryName (+ optional categoryImage) for "Other".
+function researchForm({ title, description, categoryId, newCategoryName, categoryImage, academicYear, file, image, removeImage }) {
   const form = new FormData();
   form.append("title", title);
   form.append("description", description);
-  form.append("categoryId", categoryId);
   form.append("academicYear", academicYear);
-  form.append("file", file);
-  // No Content-Type header: the browser adds multipart/form-data with its boundary.
-  const { data } = await httpClient.post("/research", form);
+  if (newCategoryName) {
+    form.append("newCategoryName", newCategoryName);
+    if (categoryImage) form.append("categoryImage", categoryImage);
+  } else {
+    form.append("categoryId", categoryId);
+  }
+  if (file) form.append("file", file);
+  if (image) form.append("image", image);                    // optional cover picture of the research
+  if (removeImage) form.append("removeImage", "true");        // edit only: delete the current picture
+  return form;
+}
+
+// No Content-Type header below: the browser adds multipart/form-data with its boundary.
+export async function uploadResearch(details) {
+  const { data } = await httpClient.post("/research", researchForm(details));
   return data;
 }
+
+// Owner only. The file is optional (keeps the old one); the research goes back to PENDING for review.
+export async function updateResearch(id, details) {
+  const { data } = await httpClient.put(`/research/${id}`, researchForm(details));
+  return data;
+}
+
+// Owner or admin.
+export const deleteResearch = (id) => httpClient.delete(`/research/${id}`);
 
 // Downloads the file and makes the browser save it under its real name.
 export async function downloadResearch({ id, fileName }) {
@@ -58,4 +80,30 @@ export async function downloadResearch({ id, fileName }) {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+/**
+ * GET    /research/{id}/comments            -> [comment]   (signed in only)
+ * POST   /research/{id}/comments { body }   -> comment     (students)
+ * PUT    /research-comments/{id}/like       -> comment     (students)    DELETE removes the like
+ * comment = { id, researchId, body, createdById, createdByName, createdByPictureUrl, createdAt, likeCount, likedByMe }
+ */
+export async function getResearchComments(researchId) {
+  const { data } = await httpClient.get(`/research/${researchId}/comments`);
+  return data;
+}
+
+export async function addResearchComment(researchId, body) {
+  const { data } = await httpClient.post(`/research/${researchId}/comments`, { body });
+  return data;
+}
+
+export async function likeResearchComment(commentId) {
+  const { data } = await httpClient.put(`/research-comments/${commentId}/like`);
+  return data;
+}
+
+export async function unlikeResearchComment(commentId) {
+  const { data } = await httpClient.delete(`/research-comments/${commentId}/like`);
+  return data;
 }

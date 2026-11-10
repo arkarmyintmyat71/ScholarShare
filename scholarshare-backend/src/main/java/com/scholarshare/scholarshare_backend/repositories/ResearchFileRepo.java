@@ -25,8 +25,11 @@ import java.util.Optional;
 public interface ResearchFileRepo extends JpaRepository<ResearchFile, Long> {
 
     String SELECT_RESPONSE = "select new com.scholarshare.scholarshare_backend.dto.responses.ResearchResponse("
-            + "r.id, r.title, r.description, c.id, c.name, r.academicYear, r.status, r.fileName, "
-            + "r.contentType, r.fileSize, u.id, u.name, r.uploadedAt, r.reviewedAt) "
+            + "r.id, r.title, r.description, c.id, c.name, c.imageUrl, r.imageUrl, r.academicYear, r.status, r.fileName, "
+            + "r.contentType, r.fileSize, u.id, u.name, r.uploadedAt, r.reviewedAt, "
+            + "(select avg(l.stars) from ResearchRating l where l.researchFile = r), "
+            + "(select count(l) from ResearchRating l where l.researchFile = r), "
+            + "(select count(rc) from ResearchComment rc where rc.researchFile = r)) "
             + "from ResearchFile r join r.category c join r.uploadedBy u ";
 
     /** Public search: filters are optional (null = all). q must already be lower-case "%text%". */

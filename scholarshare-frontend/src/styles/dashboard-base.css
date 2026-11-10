@@ -24,7 +24,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #fff;
+  background: var(--cream);
   color: var(--ink);
 }
 
@@ -51,8 +51,8 @@
 }
 
 .sd-section {
-  padding: clamp(36px, 5vw, 64px) var(--space-section-x);
-  scroll-margin-top: 78px; /* keeps headings clear of the sticky top bar */
+  margin-top: clamp(34px, 4vw, 52px);
+  scroll-margin-top: 90px; /* keeps headings clear of the sticky top bar */
 }
 
 .sd-section-heading {
@@ -61,12 +61,12 @@
   align-items: flex-end;
   flex-wrap: wrap;
   gap: 20px 30px;
-  margin-bottom: 32px;
+  margin-bottom: 22px;
 }
 
 .sd-section-heading h2 {
   max-width: 700px;
-  font: 500 var(--font-h2) / 1.12 Georgia, serif;
+  font: 500 clamp(26px, 3.4vw, 34px) / 1.12 Georgia, serif;
 }
 
 .sd-section-heading p {
@@ -77,10 +77,12 @@
 
 /* Buttons: same as the main site's orange call-to-action. */
 .sd-btn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   border: 0;
   border-radius: var(--sd-radius-control);
-  padding: 14px 22px;
+  padding: 12px 20px;
   font-weight: 800;
   font-size: 14px;
   transition: background-color var(--sd-ease), color var(--sd-ease), transform 0.1s;
@@ -101,12 +103,13 @@
   color: #fff;
 }
 
-/* Content panel: cream card with the orange top edge, like the main site's topic cards. */
+/* Content panel: white card with a soft shadow (same as the admin cards). */
 .sd-panel {
-  padding: 26px;
-  background: var(--sd-cream);
+  padding: 24px;
+  background: #fff;
+  border: 1px solid var(--sd-border);
   border-radius: var(--sd-radius-card);
-  border-top: 5px solid var(--sd-pink);
+  box-shadow: 0 8px 22px #1c375b0d;
 }
 
 .sd-muted {

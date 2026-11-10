@@ -22,8 +22,6 @@ public interface UserRepo extends JpaRepository<User, Long> {
     /** Used to send one notification per admin. */
     List<User> findByRoleAndAccountStatus(Role role, AccountStatus status);
 
-    List<User> findByAccountStatusOrderByCreatedAtAsc(AccountStatus status);
-
     long countByAccountStatus(AccountStatus status);
 
     long countByRoleAndAccountStatus(Role role, AccountStatus status);

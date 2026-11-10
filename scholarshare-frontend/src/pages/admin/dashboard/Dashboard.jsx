@@ -16,20 +16,19 @@ const TAB_COMPONENTS = {
   topics: TopicsTab,
 };
 
-// /admin/dashboard?tab=...   The header links (AdminLayout) choose the tab.
+// /admin/dashboard?tab=...   The sidebar links (AdminLayout) choose the tab.
 function AdminDashboardPage() {
   const [params] = useSearchParams();
   const tabId = TAB_COMPONENTS[params.get("tab")] ? params.get("tab") : DEFAULT_TAB;
   const Tab = TAB_COMPONENTS[tabId];
-  const { label } = ADMIN_TABS.find((tab) => tab.id === tabId);
+  const { label, hint } = ADMIN_TABS.find((tab) => tab.id === tabId);
 
   return (
-    <div className="pg-wrap">
-      <div className="pg-head">
-        <div>
-          <span className="pg-kicker">ADMINISTRATOR</span>
-          <h1>{label}</h1>
-        </div>
+    <div className="ui-page">
+      <div className="ui-head">
+        <span className="ui-kicker">ADMINISTRATOR</span>
+        <h1>{label}</h1>
+        <p>{hint}</p>
       </div>
       <Tab />
     </div>

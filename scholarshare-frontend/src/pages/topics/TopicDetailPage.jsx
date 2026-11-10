@@ -9,7 +9,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { deleteComment, deleteTopic } from "../../services/adminService";
 import { addComment, getTopic } from "../../services/topicService";
 import { timeAgo } from "../../utils/format";
-import { isAdmin, isStudent } from "../../utils/roles";
+import { can } from "../../auth/permissions";
 
 // /topics/:id - the topic, its comments, a comment box for students, and delete buttons for admins.
 function TopicDetailPage() {
@@ -82,7 +82,7 @@ function TopicDetailPage() {
               </span>
             </div>
             <p className="pg-text">{topic.body}</p>
-            {isAdmin(user) && (
+            {can.moderateTopics(user) && (
               <div className="pg-actions">
                 <button type="button" className="pg-btn danger small" onClick={() => setPendingDelete({ kind: "topic" })}>
                   Delete topic
@@ -103,7 +103,7 @@ function TopicDetailPage() {
                     <p>{comment.body}</p>
                     <small>{timeAgo(comment.createdAt)}</small>
                   </div>
-                  {isAdmin(user) && (
+                  {can.moderateTopics(user) && (
                     <button
                       type="button"
                       className="pg-btn danger small"
@@ -116,7 +116,7 @@ function TopicDetailPage() {
               ))}
             </ul>
 
-            {isStudent(user) ? (
+            {can.writeTopicComment(user) ? (
               <form className="pg-form" onSubmit={handleComment} style={{ marginTop: 18 }}>
                 <label className="pg-field">
                   Add a comment

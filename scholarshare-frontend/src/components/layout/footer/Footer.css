@@ -1,9 +1,9 @@
 .footer {
   --footer-line: rgb(255 255 255 / 0.12);
-  --footer-muted: #a0a0a6;
-  --footer-dim: #85858c;
+  --footer-muted: #a9bad0;
+  --footer-dim: #8da2bd;
 
-  background: #111;
+  background: linear-gradient(180deg, #1c375b 0%, #14283f 100%);
   color: #fff;
   border-start-start-radius: 20px;
   border-start-end-radius: 20px;

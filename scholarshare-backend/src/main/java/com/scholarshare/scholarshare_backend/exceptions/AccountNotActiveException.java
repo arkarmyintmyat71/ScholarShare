@@ -13,8 +13,6 @@ public class AccountNotActiveException extends ApiException {
 
     private static String describe(AccountStatus status) {
         return switch (status) {
-            case PENDING -> "Your account is waiting for administrator approval.";
-            case REJECTED -> "Your registration was not approved.";
             case DISABLED -> "This account has been disabled.";
             default -> "This account cannot sign in right now.";
         };

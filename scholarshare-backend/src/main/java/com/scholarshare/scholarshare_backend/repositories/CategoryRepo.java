@@ -15,11 +15,13 @@ public interface CategoryRepo extends JpaRepository<Category, Long> {
 
     boolean existsByNameIgnoreCase(String name);
 
+    java.util.Optional<Category> findByNameIgnoreCase(String name);
+
     boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
 
     /** Every category with the number of research files of the given status (APPROVED for the public). */
     @Query("select new com.scholarshare.scholarshare_backend.dto.responses.CategoryResponse(c.id, c.name, "
-            + "(select count(r) from ResearchFile r where r.category = c and r.status = :status)) "
+            + "(select count(r) from ResearchFile r where r.category = c and r.status = :status), c.imageUrl) "
             + "from Category c order by c.name")
     List<CategoryResponse> findAllWithCounts(@Param("status") ResearchStatus status);
 }

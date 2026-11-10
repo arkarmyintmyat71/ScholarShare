@@ -26,15 +26,10 @@
 }
 
 .brand-mark {
-  display: grid;
-  place-items: center;
+  display: block;
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: var(--orange);
-  color: #fff;
-  font-weight: 800;
-  font-size: 18px;
   flex-shrink: 0;
   transition: transform 0.2s;
 }
@@ -197,6 +192,44 @@
   gap: 4px;
 }
 
+/* "Sign In": outlined button, the same look as the Sign In button at the bottom of the home page. */
+.signin-btn {
+  display: inline-block;
+  padding: 11px 16px;
+  border: 1px solid #111;
+  border-radius: 10px;
+  background: transparent;
+  color: #111;
+  font-weight: 800;
+  text-align: center;
+  white-space: nowrap;
+  transition: background-color 0.15s, color 0.15s, transform 0.1s;
+}
+
+.auth-links > a.signin-btn,
+.mobile-auth > a.signin-btn {
+  color: #111;
+  text-decoration: none;
+}
+
+.signin-btn:hover,
+.signin-btn:focus-visible,
+.auth-links > a.signin-btn:hover {
+  background: #111;
+  color: #fff;
+}
+
+.signin-btn:active {
+  transform: scale(0.97);
+}
+
+.signin-btn.active,
+.auth-links > a.signin-btn.active {
+  background: #111;
+  color: #fff;
+  text-decoration: none;
+}
+
 .register {
   display: inline-block;
   background: var(--orange);
@@ -341,4 +374,26 @@
     height: 40px;
     font-size: 20px;
   }
+}
+
+/* Signed in: the profile picture links to the profile page (the text label is only for the mobile menu). */
+.nav-avatar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 999px;
+  color: inherit;
+}
+
+.nav-avatar:hover .user-avatar {
+  box-shadow: 0 0 0 3px var(--line);
+}
+
+.nav-avatar-label {
+  display: none;
+  font-weight: 700;
+}
+
+.mobile-auth .nav-avatar-label {
+  display: inline;
 }

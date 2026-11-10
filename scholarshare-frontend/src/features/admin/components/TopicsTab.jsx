@@ -9,6 +9,7 @@ import { useAsync } from "../../../hooks/useAsync";
 import { deleteTopic } from "../../../services/adminService";
 import { getTopics } from "../../../services/topicService";
 import { timeAgo } from "../../../utils/format";
+import Icon from "../../../components/shell/Icons";
 
 // Moderation: every topic with a delete button. Open a topic to delete single comments.
 function TopicsTab() {
@@ -34,25 +35,25 @@ function TopicsTab() {
   const list = data?.content ?? [];
 
   return (
-    <section className="pg-card">
-      <h2>Topics</h2>
-      {actionError && <p className="pg-message error" role="alert">{actionError}</p>}
+    <section className="ui-card flush">
+      {actionError && <p className="ui-alert" role="alert">{actionError}</p>}
       <StatusBlock isLoading={isLoading && !data} error={error} onRetry={reload} />
-      {data && list.length === 0 && <p className="pg-empty">No topics yet.</p>}
+      {data && list.length === 0 && <p className="ui-empty">No topics yet.</p>}
 
-      <ul className="pg-list">
+      <ul className="ui-rows">
         {list.map((t) => (
-          <li key={t.id} className="pg-list-item">
-            <div>
+          <li key={t.id} className="ui-row">
+            <span className="ui-bubble" title="Comments"><Icon name="chat" size={18} /> {t.commentCount}</span>
+            <div className="ui-row-main">
               <strong>{t.title}</strong>
-              <small>
-                by {t.createdByName} · {timeAgo(t.createdAt)} · {t.commentCount} comments ·{" "}
-                <Link to={topicPath(t.id)}>Open</Link>
-              </small>
+              <small>by {t.createdByName} · {timeAgo(t.createdAt)}</small>
             </div>
-            <button type="button" className="pg-btn danger small" onClick={() => setToDelete(t)}>
-              Delete
-            </button>
+            <Link className="ui-link" to={topicPath(t.id)}><Icon name="external" size={16} /> Open</Link>
+            <div className="ui-row-actions">
+              <button type="button" className="ui-btn danger sm" onClick={() => setToDelete(t)}>
+                <Icon name="trash" size={16} /> Delete
+              </button>
+            </div>
           </li>
         ))}
       </ul>

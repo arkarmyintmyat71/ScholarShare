@@ -1,0 +1,146 @@
+/* The pill buttons of the Rate · Comment · Save row (shared by the cards and the detail page). */
+.ra-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.ra-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 6px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #5b6472;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color var(--ease), color var(--ease), transform 0.1s;
+}
+
+.ra-btn:hover {
+  background: var(--cream);
+  color: var(--navy);
+}
+
+.ra-btn:active {
+  transform: scale(0.95);
+}
+
+.ra-btn.is-on:hover {
+  filter: brightness(0.96);
+}
+
+.ra-btn.saved {
+  background: rgb(179 65 114 / 0.1);
+  color: var(--orange);
+}
+
+.ra-btn.saved svg {
+  fill: currentColor;
+}
+
+.ra-btn svg,
+.ra-icon {
+  flex: none;
+}
+
+.ra-icon {
+  font-size: 19px;
+  line-height: 1;
+}
+
+.ra-btn small {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--cream);
+  font-size: 11px;
+  font-weight: 800;
+  color: inherit;
+}
+
+/* ---- star rating popover ---- */
+.rx {
+  position: relative;
+}
+
+.rx-picker {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: -8px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  max-width: calc(100vw - 24px);
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 8px 30px rgb(28 55 91 / 0.22), 0 0 0 1px rgb(28 55 91 / 0.06);
+  animation: rx-pop 0.16s ease-out;
+}
+
+/* Bridges the small gap between the button and the popover so the mouse can travel up to it. */
+.rx-picker::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 10px;
+}
+
+.rx-star {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: #c9ced8;
+  cursor: pointer;
+  transition: transform 0.12s ease, color 0.12s ease;
+}
+
+.rx-star svg { width: 28px; height: 28px; fill: currentColor; }
+.rx-star.is-lit { color: #f2a900; }
+.rx-star:hover, .rx-star:focus-visible { transform: scale(1.2); outline: none; }
+
+.rx-remove {
+  margin-left: 6px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: #8a93a3;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.rx-remove:hover { background: var(--cream); color: var(--navy); }
+
+.ra-btn.is-rated { background: rgb(242 169 0 / 0.14); color: #a86f00; }
+.ra-btn.is-rated svg { fill: #f2a900; }
+.ra-btn .ra-star { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+
+@keyframes rx-pop {
+  from { opacity: 0; transform: translateY(6px) scale(0.96); }
+}
+
+@media (max-width: 380px) {
+  .rx-star { width: 32px; height: 32px; }
+  .rx-star svg { width: 24px; height: 24px; }
+  .ra-btn { padding: 9px 8px; font-size: 13px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rx-picker { animation: none; }
+}

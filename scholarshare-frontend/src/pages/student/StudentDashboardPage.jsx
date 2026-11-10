@@ -1,20 +1,19 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 import { useAuth } from "../../hooks/useAuth";
 import { useAsync } from "../../hooks/useAsync";
 import { getCategories } from "../../services/categoryService";
-import { ROUTES } from "../../config/constants";
 import { firstName } from "../../utils/format";
 import { useBookmarks } from "../../features/student/hooks/useBookmarks";
-import { useExploreResearch } from "../../features/student/hooks/useExploreResearch";
+import { useEngagement } from "../../features/research/useEngagement";
 import { useUploads } from "../../features/student/hooks/useUploads";
 
 import WelcomeBanner from "../../features/student/components/WelcomeBanner";
 import StatsStrip from "../../features/student/components/StatsStrip";
 import ExploreSection from "../../features/student/components/ExploreSection";
-import CategoryShortcuts from "../../features/student/components/CategoryShortcuts";
 import MyLibrarySection from "../../features/student/components/MyLibrarySection";
 import UploadSection from "../../features/student/components/UploadSection";
+import CommentsModal from "../../features/research/CommentsModal";
 
 /**
  * The student dashboard page. It loads the data (categories, research, uploads, saved items)
@@ -22,28 +21,32 @@ import UploadSection from "../../features/student/components/UploadSection";
  */
 function StudentDashboardPage() {
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const categories = useAsync(getCategories, []);
-  const explore = useExploreResearch();
   const bookmarks = useBookmarks();
   const uploads = useUploads();
+  const engagement = useEngagement();
+  const [commentsFor, setCommentsFor] = useState(null); // the research whose comments window is open
 
   const categoryList = categories.data ?? [];
 
-  const handleCategorySelect = (categoryId) => {
-    explore.setCategoryId(categoryId);
-    navigate({ pathname: ROUTES.student, hash: "#explore" });
+  // A student may have just created a new category with "Other", so refresh the category lists afterwards.
+  const handleUpload = async (details) => {
+    const created = await uploads.upload(details);
+    if (details.newCategoryName) categories.reload();
+    return created;
   };
 
   return (
     <>
       <WelcomeBanner name={firstName(user)} />
-      <StatsStrip uploadCount={uploads.uploads.length} savedCount={bookmarks.saved.length} />
+      <StatsStrip uploadCount={uploads.uploads.length} savedCount={bookmarks.saved.length} counts={uploads.counts} />
 
-      <ExploreSection explore={explore} categories={categoryList} bookmarks={bookmarks} />
-
-      <CategoryShortcuts categories={categoryList} onSelect={handleCategorySelect} />
+      <ExploreSection
+        bookmarks={bookmarks}
+        engagement={engagement}
+        onOpenComments={setCommentsFor}
+      />
 
       <MyLibrarySection
         uploads={uploads.uploads}
@@ -53,7 +56,15 @@ function StudentDashboardPage() {
         onRemoveSaved={bookmarks.remove}
       />
 
-      <UploadSection categories={categoryList} onSubmit={uploads.upload} />
+      <UploadSection categories={categoryList} onSubmit={handleUpload} />
+
+      {commentsFor && (
+        <CommentsModal
+          research={commentsFor}
+          onClose={() => setCommentsFor(null)}
+          onCountChange={engagement.changeCommentCount}
+        />
+      )}
     </>
   );
 }

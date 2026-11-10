@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { mediaUrl } from "../../utils/media";
 import "./UserAvatar.css";
 
 // Brand-friendly background colours; the same name always gets the same one.
@@ -13,21 +14,22 @@ function colorFor(name) {
 /**
  * Round profile picture. Shows the user's photo when there is one,
  * otherwise their first initial on a colour (like YouTube / Google).
- * `size` is in pixels.
+ * `pictureUrl` may be a relative API path ("/users/5/avatar?v=1") or a full link. `size` is in pixels.
  */
 function UserAvatar({ name = "Student", pictureUrl, size = 36 }) {
-  const [imageFailed, setImageFailed] = useState(false);
+  const [failedSrc, setFailedSrc] = useState(null);
+  const src = mediaUrl(pictureUrl);
   const style = { width: size, height: size, fontSize: Math.round(size * 0.45) };
 
-  if (pictureUrl && !imageFailed) {
+  if (src && src !== failedSrc) {
     return (
       <img
         className="user-avatar"
         style={style}
-        src={pictureUrl}
+        src={src}
         alt=""
         referrerPolicy="no-referrer"
-        onError={() => setImageFailed(true)}
+        onError={() => setFailedSrc(src)}
       />
     );
   }

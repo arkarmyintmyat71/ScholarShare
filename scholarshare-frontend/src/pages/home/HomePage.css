@@ -2,7 +2,7 @@
    Hero
    ------------------------------------------------------------------ */
 .hero {
-  background: var(--navy);
+  background: linear-gradient(110deg, #1c375b 0%, #1c375b 55%, #16304a 100%);
   color: #fff;
   display: grid;
   grid-template-columns: 1fr;
@@ -127,15 +127,19 @@
    Quick strip
    ------------------------------------------------------------------ */
 .quick-strip {
-  background: var(--gold);
-  border-end-end-radius: 20px;
-  border-end-start-radius: 20px;
+  position: relative;
+  z-index: 2;
+  margin: -34px 5% 0;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 16px 36px #1c375b24;
   display: grid;
   /* Three even columns from the start: with a 2-column base grid, the
      third item ("Connect") had nowhere to go and sat orphaned alone
      on its own row with an empty gap beside it. */
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  padding: 20px 5%;
+  padding: 22px 26px;
   align-items: center;
   gap: 16px 10px;
 }
@@ -149,7 +153,7 @@
   /* Was a hardcoded blue (#4172b3) that didn't belong to this
      palette; a translucent dark divider reads correctly against the
      gold background instead. */
-  border-left: 1px solid rgb(15 32 48 / 0.25);
+  border-left: 1px solid var(--line);
   padding-left: 14px;
   min-width: 0;
 }
@@ -159,9 +163,15 @@
   display: block;
 }
 
+.quick-strip b {
+  color: var(--orange);
+  font: 700 18px Georgia, serif;
+}
+
 .quick-strip span {
-  font-size: 12px;
+  font-size: 13px;
   margin-top: 4px;
+  color: var(--muted);
 }
 
 /* ------------------------------------------------------------------
@@ -171,85 +181,6 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 20px;
-}
-
-/* ------------------------------------------------------------------
-   Categories ("path")
-   ------------------------------------------------------------------ */
-.path {
-  background: var(--navy);
-  color: #fff;
-  border-radius: 24px;
-  padding: clamp(36px, 6vw, 85px) 6%;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 40px;
-}
-
-.path h2 {
-  font: 500 var(--font-h2) / 1.12 Georgia, serif;
-}
-
-.path > div > p:not(.kicker) {
-  line-height: 1.6;
-  color: #dce4e9;
-  margin: 22px 0;
-}
-
-/* This button had no styles at all, so it fell back to a default
-   blue, underlined browser link on a dark navy background — a ghost
-   button that inverts to solid gold on hover/focus. */
-.light-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid rgb(255 255 255 / 0.45);
-  border-radius: 999px;
-  padding: 12px 22px;
-  color: #000000;
-  font-weight: 700;
-  font-size: 14px;
-  text-decoration: none;
-  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
-}
-
-.light-btn:hover,
-.light-btn:focus-visible {
-  background: var(--gold);
-  border-color: var(--gold);
-  color: #16232f;
-}
-
-.subject-list {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-.subject-list a {
-  padding: 20px 8px;
-  border-bottom: 1px solid #61707a;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 700;
-  color: #fff;
-  text-decoration: none;
-  transition: color 0.15s, padding-left 0.15s;
-}
-
-.subject-list a span {
-  transition: transform 0.15s;
-}
-
-.subject-list a:hover,
-.subject-list a:focus-visible {
-  color: var(--gold);
-  padding-left: 14px;
-}
-
-.subject-list a:hover span,
-.subject-list a:focus-visible span {
-  transform: translateX(4px);
 }
 
 /* ------------------------------------------------------------------
@@ -266,7 +197,8 @@
    ------------------------------------------------------------------ */
 .community {
   padding: clamp(36px, 6vw, 85px) 6%;
-  background: var(--gold);
+  background: linear-gradient(110deg, #1c375b 0%, #16304a 100%);
+  color: #fff;
   display: grid;
   grid-template-columns: 1fr;
   gap: 40px;
@@ -290,6 +222,11 @@
   gap: 20px;
 }
 
+.stat-card {
+  color: var(--ink);
+  box-shadow: 0 18px 40px #0003;
+}
+
 .stat-card strong {
   align-self: center;
   font: 600 clamp(20px, 2.4vw, 27px) Georgia;
@@ -306,7 +243,7 @@
 .cta {
   text-align: center;
   padding: clamp(40px, 8vw, 75px) 5%;
-  background: var(--cream);
+  background: linear-gradient(180deg, var(--cream) 0%, #e9eff8 100%);
 }
 
 .cta h2 {
@@ -385,10 +322,6 @@
   .card-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-
-  .subject-list {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 
 /* Tablet / small laptop */
@@ -401,7 +334,6 @@
     grid-column: auto;
   }
 
-  .path,
   .community {
     grid-template-columns: 1fr 1fr;
   }
@@ -531,10 +463,18 @@
   }
 
   .card-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .topic-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+@media (min-width: 1500px) {
+  .card-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (max-width: 779px) {
+  .quick-strip { margin-inline: 16px; }
 }

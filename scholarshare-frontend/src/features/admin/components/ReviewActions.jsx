@@ -10,40 +10,30 @@ function ReviewActions({ onApprove, onReject, disabled }) {
   if (isRejecting) {
     return (
       <form
-        className="pg-row-actions"
+        className="ui-reject"
         onSubmit={(event) => {
           event.preventDefault();
           onReject(reason.trim() || undefined);
         }}
       >
         <input
-          className="pg-reason"
           value={reason}
           onChange={(event) => setReason(event.target.value)}
           maxLength={120}
-          placeholder="Reason (optional)"
+          placeholder="Reason for the student (optional)"
           aria-label="Reason for rejecting"
           autoFocus
-          style={{ minHeight: 34, padding: "4px 10px", border: "1px solid var(--line)", borderRadius: 10, font: "inherit" }}
         />
-        <button type="submit" className="pg-btn danger small" disabled={disabled}>
-          Confirm reject
-        </button>
-        <button type="button" className="pg-btn secondary small" onClick={() => setIsRejecting(false)}>
-          Cancel
-        </button>
+        <button type="submit" className="ui-btn danger sm" disabled={disabled}>Confirm reject</button>
+        <button type="button" className="ui-btn ghost sm" onClick={() => setIsRejecting(false)}>Cancel</button>
       </form>
     );
   }
 
   return (
-    <div className="pg-row-actions">
-      <button type="button" className="pg-btn small" disabled={disabled} onClick={onApprove}>
-        Approve
-      </button>
-      <button type="button" className="pg-btn danger small" disabled={disabled} onClick={() => setIsRejecting(true)}>
-        Reject
-      </button>
+    <div className="ui-row-actions">
+      <button type="button" className="ui-btn sm" disabled={disabled} onClick={onApprove}>Approve</button>
+      <button type="button" className="ui-btn danger sm" disabled={disabled} onClick={() => setIsRejecting(true)}>Reject</button>
     </div>
   );
 }

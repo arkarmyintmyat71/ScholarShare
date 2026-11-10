@@ -1,87 +1,126 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
-import UserAvatar from "../../components/account/UserAvatar";
+import ConfirmDialog from "../../components/confirmDialog/ConfirmDialog";
+import StatusBlock from "../../components/StatusBlock";
+import { ROUTES } from "../../config/constants";
+import AccountSettingsModal from "../../features/profile/components/AccountSettingsModal";
+import EditProfileModal from "../../features/profile/components/EditProfileModal";
+import { IntroCard } from "../../features/profile/components/IntroCards";
+import ProfileHeader from "../../features/profile/components/ProfileHeader";
+import ResearchItem from "../../features/profile/components/ResearchItem";
+import { useAvatarFrame } from "../../features/profile/avatarFrame";
+import { useAvatar } from "../../features/profile/useAvatar";
+import { useAsync } from "../../hooks/useAsync";
 import { useAuth } from "../../hooks/useAuth";
-import { updateProfile } from "../../services/userService";
-import { capitalize, dateText } from "../../utils/format";
+import { deleteResearch, getMyResearch } from "../../services/researchService";
+import { isStudent } from "../../utils/roles";
+import "../../features/profile/profile.css";
 
-// /profile - the signed-in user's account. The name and picture link can be changed.
+// /profile - one page: framed photo + name, the Intro card (with "Edit details") and the student's own research.
+// The e-mail is only shown, never edited.
 function ProfilePage() {
-  const { user, setUser } = useAuth();
-  const [form, setForm] = useState({ name: user.name, pictureUrl: user.pictureUrl ?? "" });
-  const [message, setMessage] = useState(null); // { type: "success" | "error", text }
-  const [isSaving, setIsSaving] = useState(false);
+  const { user, setUser, logout } = useAuth();
+  const student = isStudent(user);
 
-  const handleChange = (event) => setForm((prev) => ({ ...prev, [event.target.name]: event.target.value }));
+  const research = useAsync(getMyResearch, [], { enabled: student });
+  const avatar = useAvatar(setUser);
+  const [frame, updateFrame, resetFrame] = useAvatarFrame(user.id);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setMessage(null);
-    setIsSaving(true);
+  const [modal, setModal] = useState(null); // "edit" | "settings" | "signout"
+  const [toDelete, setToDelete] = useState(null);
+  const [actionError, setActionError] = useState(null);
+
+  const confirmDelete = async () => {
+    const item = toDelete;
+    setToDelete(null);
+    setActionError(null);
     try {
-      const updated = await updateProfile({ name: form.name.trim(), pictureUrl: form.pictureUrl.trim() });
-      setUser(updated);
-      setMessage({ type: "success", text: "Profile saved." });
+      await deleteResearch(item.id);
+      research.setData((prev) => (prev ?? []).filter((r) => r.id !== item.id));
     } catch (err) {
-      setMessage({ type: "error", text: err.message });
-    } finally {
-      setIsSaving(false);
+      setActionError(err.message);
     }
   };
 
+  const list = research.data ?? [];
+  const approved = list.filter((r) => r.status === "APPROVED").length;
+  const stats = student && research.data
+    ? `${list.length} research ${list.length === 1 ? "submission" : "submissions"} · ${approved} approved`
+    : null;
+
   return (
-    <div className="pg-wrap pg-narrow">
-      <section className="pg-card">
-        <span className="pg-kicker">MY ACCOUNT</span>
-        <div style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 18 }}>
-          <UserAvatar name={user.name} pictureUrl={user.pictureUrl} size={64} />
-          <div>
-            <h1 style={{ fontSize: 26 }}>{user.name}</h1>
-            <p className="pg-meta" style={{ margin: "4px 0 0" }}>
-              <span>{user.email}</span>
-              <span className="pg-badge">{capitalize(user.role.toLowerCase())}</span>
-            </p>
-          </div>
-        </div>
-        <p className="pg-meta" style={{ margin: 0 }}>
-          <span>Member since {dateText(user.createdAt)}</span>
-        </p>
-      </section>
+    <div className="fp-page">
+      <ProfileHeader
+        user={user}
+        avatar={avatar}
+        frame={frame}
+        stats={stats}
+        onSettings={() => setModal("settings")}
+        onSignOut={() => setModal("signout")}
+      />
 
-      <form className="pg-card pg-form" onSubmit={handleSubmit}>
-        <h2>Edit profile</h2>
-        <label className="pg-field">
-          Name
-          <input name="name" value={form.name} onChange={handleChange} maxLength={100} required />
-        </label>
-        <label className="pg-field">
-          Picture link (optional)
-          <input
-            name="pictureUrl"
-            type="url"
-            value={form.pictureUrl}
-            onChange={handleChange}
-            placeholder="https://…"
-            maxLength={255}
-          />
-          <small>Paste the address of an image. Leave empty to use your initials.</small>
-        </label>
-        <label className="pg-field">
-          Email
-          <input value={user.email} disabled readOnly />
-        </label>
+      <div className="fp-content">
+        {actionError && <p className="fp-feedback error" role="alert">{actionError}</p>}
+        <div className="fp-grid">
+          <aside className="fp-left" aria-label="Profile introduction">
+            <IntroCard user={user} onEdit={() => setModal("edit")} />
+          </aside>
 
-        {message && (
-          <p className={`pg-message ${message.type}`} role={message.type === "error" ? "alert" : "status"}>
-            {message.text}
-          </p>
-        )}
-        <div>
-          <button type="submit" className="pg-btn" disabled={isSaving || !form.name.trim()}>
-            {isSaving ? "Saving…" : "Save changes"}
-          </button>
+          <section className="fp-feed" aria-label="My research">
+            <div className="fp-feed-heading">
+              <h2>{student ? "My research" : "Administrator account"}</h2>
+            </div>
+
+            {!student && (
+              <div className="fp-empty">
+                <h3>You are signed in as an administrator</h3>
+                <p>Review accounts and research from the admin dashboard.</p>
+                <Link className="fp-btn primary" to={ROUTES.adminDashboard}>Open admin dashboard</Link>
+              </div>
+            )}
+
+            {student && (
+              <>
+                <StatusBlock isLoading={research.isLoading && !research.data} error={research.error} onRetry={research.reload} />
+                {research.data && list.length === 0 && (
+                  <div className="fp-empty">
+                    <h3>No research yet</h3>
+                    <p>Share your first paper with the community.</p>
+                    <Link className="fp-btn primary" to={`${ROUTES.student}#upload`}>Submit research</Link>
+                  </div>
+                )}
+                <div className="fp-stack">
+                  {list.map((r) => <ResearchItem key={r.id} research={r} onDelete={setToDelete} />)}
+                </div>
+              </>
+            )}
+          </section>
         </div>
-      </form>
+      </div>
+
+      {modal === "edit" && <EditProfileModal user={user} setUser={setUser} onClose={() => setModal(null)} />}
+      {modal === "settings" && <AccountSettingsModal user={user} avatar={avatar} frame={frame} onFrameChange={updateFrame} onFrameReset={resetFrame} onClose={() => setModal(null)} />}
+
+      {modal === "signout" && (
+        <ConfirmDialog
+          title="Sign out of ScholarShare?"
+          message="You'll need to sign in again to share research and see your saved items."
+          confirmLabel="Sign out"
+          onConfirm={logout}
+          onCancel={() => setModal(null)}
+        />
+      )}
+
+      {toDelete && (
+        <ConfirmDialog
+          title={`Delete "${toDelete.title}"?`}
+          message="The file, its likes and its comments will be removed for good."
+          confirmLabel="Delete"
+          onConfirm={confirmDelete}
+          onCancel={() => setToDelete(null)}
+        />
+      )}
     </div>
   );
 }

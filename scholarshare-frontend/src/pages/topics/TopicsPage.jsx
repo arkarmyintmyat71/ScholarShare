@@ -9,7 +9,7 @@ import { useAsync } from "../../hooks/useAsync";
 import { useAuth } from "../../hooks/useAuth";
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import { createTopic, getTopics } from "../../services/topicService";
-import { isStudent } from "../../utils/roles";
+import { can } from "../../auth/permissions";
 import "./TopicsPage.css";
 
 const EMPTY_FORM = { title: "", body: "" };
@@ -57,7 +57,7 @@ function TopicsPage() {
           <h1>Discussion topics</h1>
           <p>Ask a question, share an idea, and talk with other students.</p>
         </div>
-        {isStudent(user) && (
+        {can.createTopic(user) && (
           <button type="button" className="pg-btn" onClick={() => setIsFormOpen((open) => !open)}>
             {isFormOpen ? "Close" : "＋ New topic"}
           </button>

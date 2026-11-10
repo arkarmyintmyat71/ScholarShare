@@ -1,14 +1,10 @@
 package com.scholarshare.scholarshare_backend.entities.enums;
 
 /**
- * PENDING   - just registered, cannot sign in until an admin approves
- * APPROVED  - normal account
- * REJECTED  - admin refused the registration
- * DISABLED  - approved earlier, later switched off by an admin
+ * APPROVED  - normal account. Every new student account starts here: sign-up needs no admin approval.
+ * DISABLED  - switched off later by an admin; the person can no longer sign in.
  */
 public enum AccountStatus {
-    PENDING,
     APPROVED,
-    REJECTED,
     DISABLED
 }

@@ -12,6 +12,10 @@ public record UserResponse(
         String pictureUrl,
         Role role,
         AccountStatus accountStatus,
-        Instant createdAt
+        Instant createdAt,
+        String headline,
+        String bio,
+        String university,
+        String location
 ) {
 }

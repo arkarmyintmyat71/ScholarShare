@@ -39,6 +39,19 @@ public class User {
     @Column(name = "picture_url", length = 255)
     private String pictureUrl;
 
+    // Profile details shown on the profile page (all optional).
+    @Column(length = 110)
+    private String headline;
+
+    @Column(length = 420)
+    private String bio;
+
+    @Column(length = 90)
+    private String university;
+
+    @Column(length = 90)
+    private String location;
+
     // columnDefinition keeps these as plain VARCHAR (Hibernate would otherwise create MySQL ENUM columns).
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20, columnDefinition = "VARCHAR(20)")

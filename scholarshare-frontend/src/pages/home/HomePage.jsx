@@ -1,36 +1,39 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import ResearchCard from "../../components/researchCard/ResearchCard";
 import StatusBlock from "../../components/StatusBlock";
+import ResearchBrowser from "../../features/research/ResearchBrowser";
 import TopicCard from "../../components/topicCard/TopicCard";
 import { ROUTES } from "../../config/constants";
 import { TRENDING_TOPICS, ABOUT_POINTS, heroResearch } from "../../data/homeContent";
 import { useAsync } from "../../hooks/useAsync";
 import { useAuth } from "../../hooks/useAuth";
-import { getCategories } from "../../services/categoryService";
-import { searchResearch } from "../../services/researchService";
 import { getTopics } from "../../services/topicService";
 import "./HomePage.css";
 
-const HOME_RESEARCH_COUNT = 4;
 const HOME_TOPIC_COUNT = 3;
+
+const NO_FILTERS = { q: "", categoryId: "", year: "", page: 0 };
 
 function HomePage() {
   const [search, setSearch] = useState("");
+  // Filters of the research list in the "Explore" section (the hero search and the category list set them too).
+  const [filters, setFilters] = useState(NO_FILTERS);
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
-  // Real data from the backend: newest approved research, categories, and (for signed-in users) topics.
-  const research = useAsync(() => searchResearch({ size: HOME_RESEARCH_COUNT }), []);
-  const categories = useAsync(getCategories, []);
+  // Real data from the backend: (for signed-in users) topics. The research list loads itself.
   const topics = useAsync(() => getTopics({ size: HOME_TOPIC_COUNT }), [], { enabled: isAuthenticated });
+
+  // Show the matching research in the Explore section of this same page.
+  const showResearch = (changes) => {
+    setFilters({ ...NO_FILTERS, ...changes });
+    navigate({ pathname: ROUTES.home, hash: "#explore" });
+  };
 
   const runSearch = (query) => {
     const trimmed = query.trim();
-    if (trimmed) {
-      navigate(`/search?q=${encodeURIComponent(trimmed)}`);
-    }
+    if (trimmed) showResearch({ q: trimmed });
   };
 
   const handleSearchSubmit = (event) => {
@@ -134,43 +137,9 @@ function HomePage() {
             <h2>Find research that helps you move forward</h2>
           </div>
 
-          <Link to="/categories">Browse all categories →</Link>
         </div>
 
-        <StatusBlock isLoading={research.isLoading && !research.data} error={research.error} onRetry={research.reload} />
-        <div className="card-grid">
-          {(research.data?.content ?? []).map((item) => (
-            <ResearchCard key={item.id} research={item} />
-          ))}
-        </div>
-        {research.data && research.data.content.length === 0 && (
-          <p className="status-message">No research has been published yet.</p>
-        )}
-      </section>
-
-      {/* Categories */}
-      <section className="path" id="categories">
-        <div>
-          <p className="kicker">BROWSE BY SUBJECT</p>
-          <h2>Start with your academic area</h2>
-
-          <p>
-            Choose a category and discover research resources related to
-            your study interests.
-          </p>
-
-          <a className="light-btn" href="#categoryList">
-            Explore categories
-          </a>
-        </div>
-
-        <div className="subject-list" id="categoryList">
-          {(categories.data ?? []).map(({ id, name }) => (
-            <Link key={id} to={`${ROUTES.search}?categoryId=${id}`}>
-              {name} <span aria-hidden="true">→</span>
-            </Link>
-          ))}
-        </div>
+        <ResearchBrowser filters={filters} onChange={setFilters} />
       </section>
 
       {/* Topics */}

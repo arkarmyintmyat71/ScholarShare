@@ -18,4 +18,8 @@ public class Category {
 
     @Column(nullable = false, unique = true, length = 100)
     private String name;
+
+    /** Relative URL of the category photo ("/categories/3/image?v=..."), or null. The bytes live in category_images. */
+    @Column(name = "image_url", length = 255)
+    private String imageUrl;
 }

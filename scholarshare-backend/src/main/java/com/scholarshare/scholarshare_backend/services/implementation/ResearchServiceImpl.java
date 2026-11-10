@@ -2,10 +2,12 @@ package com.scholarshare.scholarshare_backend.services.implementation;
 
 import com.scholarshare.scholarshare_backend.dto.requests.ReviewRequest;
 import com.scholarshare.scholarshare_backend.dto.responses.FileDownload;
+import com.scholarshare.scholarshare_backend.dto.responses.ImageDownload;
 import com.scholarshare.scholarshare_backend.dto.responses.PageResponse;
 import com.scholarshare.scholarshare_backend.dto.responses.ResearchResponse;
 import com.scholarshare.scholarshare_backend.entities.Category;
 import com.scholarshare.scholarshare_backend.entities.ResearchFile;
+import com.scholarshare.scholarshare_backend.entities.ResearchImage;
 import com.scholarshare.scholarshare_backend.entities.User;
 import com.scholarshare.scholarshare_backend.entities.enums.NotificationType;
 import com.scholarshare.scholarshare_backend.entities.enums.RelatedEntityType;
@@ -13,12 +15,19 @@ import com.scholarshare.scholarshare_backend.entities.enums.ResearchStatus;
 import com.scholarshare.scholarshare_backend.entities.enums.Role;
 import com.scholarshare.scholarshare_backend.exceptions.ApiException;
 import com.scholarshare.scholarshare_backend.exceptions.NotFoundException;
+import com.scholarshare.scholarshare_backend.repositories.BookmarkRepo;
 import com.scholarshare.scholarshare_backend.repositories.CategoryRepo;
+import com.scholarshare.scholarshare_backend.repositories.ResearchCommentLikeRepo;
+import com.scholarshare.scholarshare_backend.repositories.ResearchCommentRepo;
+import com.scholarshare.scholarshare_backend.repositories.ResearchRatingRepo;
+import com.scholarshare.scholarshare_backend.services.CategoryService;
 import com.scholarshare.scholarshare_backend.repositories.ResearchFileRepo;
+import com.scholarshare.scholarshare_backend.repositories.ResearchImageRepo;
 import com.scholarshare.scholarshare_backend.repositories.UserRepo;
 import com.scholarshare.scholarshare_backend.securities.CurrentUser;
 import com.scholarshare.scholarshare_backend.services.NotificationPublisher;
 import com.scholarshare.scholarshare_backend.services.ResearchService;
+import com.scholarshare.scholarshare_backend.utils.ImageValidator;
 import com.scholarshare.scholarshare_backend.utils.Paging;
 import com.scholarshare.scholarshare_backend.utils.UploadValidator;
 import com.scholarshare.scholarshare_backend.utils.UploadValidator.ValidatedFile;
@@ -40,6 +49,12 @@ public class ResearchServiceImpl implements ResearchService {
 
     private final ResearchFileRepo researchRepo;
     private final CategoryRepo categoryRepo;
+    private final CategoryService categoryService;
+    private final ResearchRatingRepo ratingRepo;
+    private final ResearchCommentRepo commentRepo;
+    private final ResearchCommentLikeRepo commentLikeRepo;
+    private final BookmarkRepo bookmarkRepo;
+    private final ResearchImageRepo imageRepo;
     private final UserRepo userRepo;
     private final CurrentUser currentUser;
     private final NotificationPublisher notifications;
@@ -74,6 +89,14 @@ public class ResearchServiceImpl implements ResearchService {
 
     @Override
     @Transactional(readOnly = true)
+    public ImageDownload image(Long id) {
+        return imageRepo.findById(id)
+                .map(i -> new ImageDownload(i.getContentType(), i.getData()))
+                .orElseThrow(() -> new NotFoundException("Picture not found"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<ResearchResponse> mine() {
         return researchRepo.findByUploader(currentUser.require().getId());
     }
@@ -82,20 +105,17 @@ public class ResearchServiceImpl implements ResearchService {
 
     @Override
     @Transactional
-    public ResearchResponse upload(String title, String description, Long categoryId,
-                                   Integer academicYear, MultipartFile file) {
+    public ResearchResponse upload(String title, String description, Long categoryId, String newCategoryName,
+                                   MultipartFile categoryImage, Integer academicYear, MultipartFile file,
+                                   MultipartFile image) {
         User uploader = currentUser.require();
 
         String cleanTitle = required(title, "Title", 255);
         String cleanDescription = required(description, "Description", 1000);
-        if (academicYear == null || academicYear < MIN_YEAR || academicYear > Year.now().getValue() + 1) {
-            throw bad("Academic year must be between " + MIN_YEAR + " and " + (Year.now().getValue() + 1) + ".");
-        }
-        if (categoryId == null) {
-            throw bad("Category is required.");
-        }
-        Category category = categoryRepo.findById(categoryId).orElseThrow(() -> bad("Category not found."));
+        checkYear(academicYear);
         ValidatedFile validated = UploadValidator.validate(file);
+        ImageValidator.ValidatedImage picture = image == null || image.isEmpty() ? null : ImageValidator.validate(image);
+        Category category = resolveCategory(categoryId, newCategoryName, categoryImage);
 
         ResearchFile saved = researchRepo.save(ResearchFile.builder()
                 .title(cleanTitle)
@@ -109,12 +129,80 @@ public class ResearchServiceImpl implements ResearchService {
                 .fileData(validated.data())
                 .uploadedBy(uploader)
                 .build());
+        if (picture != null) {
+            saveImage(saved, picture);
+        }
 
         notifications.toAdmins(NotificationType.FILE_SUBMITTED,
                 uploader.getName() + " submitted \"" + cleanTitle + "\" for review.",
                 RelatedEntityType.RESEARCH_FILE, saved.getId());
 
         return researchRepo.findResponseById(saved.getId()).orElseThrow();
+    }
+
+    @Override
+    @Transactional
+    public ResearchResponse update(Long id, String title, String description, Long categoryId, String newCategoryName,
+                                   MultipartFile categoryImage, Integer academicYear, MultipartFile file,
+                                   MultipartFile image, boolean removeImage) {
+        User user = currentUser.require();
+        ResearchFile research = researchRepo.findById(id).orElseThrow(() -> new NotFoundException("Research not found"));
+        // Someone else's file answers "not found", exactly like a hidden file.
+        if (!research.getUploadedBy().getId().equals(user.getId())) {
+            throw new NotFoundException("Research not found");
+        }
+
+        String cleanTitle = required(title, "Title", 255);
+        String cleanDescription = required(description, "Description", 1000);
+        checkYear(academicYear);
+        ValidatedFile validated = file == null || file.isEmpty() ? null : UploadValidator.validate(file);
+        ImageValidator.ValidatedImage picture = image == null || image.isEmpty() ? null : ImageValidator.validate(image);
+        Category category = resolveCategory(categoryId, newCategoryName, categoryImage);
+
+        research.setTitle(cleanTitle);
+        research.setDescription(cleanDescription);
+        research.setCategory(category);
+        research.setAcademicYear(academicYear);
+        if (validated != null) {
+            research.setFileName(validated.fileName());
+            research.setContentType(validated.contentType());
+            research.setFileSize((long) validated.data().length);
+            research.setFileData(validated.data());
+        }
+        if (picture != null) {
+            saveImage(research, picture);
+        } else if (removeImage) {
+            imageRepo.deleteById(id);
+            research.setImageUrl(null);
+        }
+        // An edited file must be checked again before it is public.
+        research.setStatus(ResearchStatus.PENDING);
+        research.setReviewedBy(null);
+        research.setReviewedAt(null);
+        researchRepo.saveAndFlush(research);
+
+        notifications.toAdmins(NotificationType.FILE_SUBMITTED,
+                user.getName() + " updated \"" + cleanTitle + "\" and sent it for review again.",
+                RelatedEntityType.RESEARCH_FILE, id);
+
+        return researchRepo.findResponseById(id).orElseThrow();
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        User user = currentUser.require();
+        ResearchResponse research = researchRepo.findResponseById(id)
+                .orElseThrow(() -> new NotFoundException("Research not found"));
+        if (user.getRole() != Role.ADMIN && !research.uploadedById().equals(user.getId())) {
+            throw new NotFoundException("Research not found");
+        }
+        commentLikeRepo.deleteByResearch(id);
+        commentRepo.deleteByResearch(id);
+        ratingRepo.deleteByResearch(id);
+        bookmarkRepo.deleteByResearch(id);
+        imageRepo.deleteById(id);
+        researchRepo.deleteById(id);
     }
 
     // ------------------------------------------------------------------ admin
@@ -167,6 +255,30 @@ public class ResearchServiceImpl implements ResearchService {
         return currentUser.find()
                 .map(user -> user.getRole() == Role.ADMIN || user.getId().equals(research.uploadedById()))
                 .orElse(false);
+    }
+
+    private Category resolveCategory(Long categoryId, String newCategoryName, MultipartFile categoryImage) {
+        if (newCategoryName != null && !newCategoryName.isBlank()) {       // the student chose "Other"
+            return categoryService.findOrCreate(newCategoryName, categoryImage);
+        }
+        if (categoryId == null) {
+            throw bad("Category is required.");
+        }
+        return categoryRepo.findById(categoryId).orElseThrow(() -> bad("Category not found."));
+    }
+
+    /** Stores (or replaces) the cover picture and remembers its address; the ?v= makes browsers reload a new one. */
+    private void saveImage(ResearchFile research, ImageValidator.ValidatedImage picture) {
+        imageRepo.save(ResearchImage.builder().researchFileId(research.getId())
+                .contentType(picture.contentType()).data(picture.data()).build());
+        research.setImageUrl("/research/" + research.getId() + "/image?v=" + System.currentTimeMillis());
+        researchRepo.saveAndFlush(research);
+    }
+
+    private static void checkYear(Integer academicYear) {
+        if (academicYear == null || academicYear < MIN_YEAR || academicYear > Year.now().getValue() + 1) {
+            throw bad("Academic year must be between " + MIN_YEAR + " and " + (Year.now().getValue() + 1) + ".");
+        }
     }
 
     private static String required(String value, String label, int max) {

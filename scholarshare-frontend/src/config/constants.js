@@ -21,7 +21,6 @@ export const ROUTES = {
   register: "/register",
   categories: "/categories",
   topics: "/topics",
-  search: "/search",
   profile: "/profile",
   student: "/student",
   adminDashboard: "/admin/dashboard",
@@ -29,6 +28,7 @@ export const ROUTES = {
 
 // Paths that need an id.
 export const researchPath = (id) => `/research/${id}`;
+export const researchEditPath = (id) => `/research/${id}/edit`;
 export const topicPath = (id) => `/topics/${id}`;
 
 // Must match the backend (UploadValidator): 10 MB, these extensions.

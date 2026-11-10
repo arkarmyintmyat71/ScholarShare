@@ -50,6 +50,10 @@ public class ResearchFile {
     @Column(name = "file_size", nullable = false)
     private Long fileSize;
 
+    /** "/research/5/image?v=..." when the student added a cover picture (bytes are in research_images). */
+    @Column(name = "image_url", length = 255)
+    private String imageUrl;
+
     @Lob
     @Column(name = "file_data", nullable = false, columnDefinition = "LONGBLOB")
     private byte[] fileData;

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 import { researchPath } from "../../config/constants";
-import { categoryImage } from "../../utils/categoryImage";
+import { researchImage } from "../../utils/categoryImage";
 import "./ResearchCard.css";
 
 /**
@@ -15,7 +15,7 @@ function ResearchCard({ research }) {
     <Link to={researchPath(id)} className="research-card-link">
       <article className="research-card">
         <div className="card-top photo-top">
-          <img src={categoryImage(categoryName)} alt="" loading="lazy" />
+          <img src={researchImage(research)} alt="" loading="lazy" />
         </div>
 
         <div className="card-body">

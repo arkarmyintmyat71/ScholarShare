@@ -19,8 +19,9 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
  * Who may call what. Paths here are relative to the /api context path.
- *   public:  POST /auth/login, POST /auth/register, health check
- *   public:  GET /research, /research/{id}, /research/{id}/download, /categories
+ *   public:  POST /auth/login, /auth/register, /auth/google, health check
+ *   public:  GET /research, /research/{id} (the description), /categories, category photos, research pictures and profile photos
+ *   signed in (any role): GET /research/{id}/download and GET /research/{id}/comments - guests cannot download or read comments
  *   admin:   /admin/**  (role ADMIN)
  *   student: upload, my uploads, create topic/comment, bookmarks  (role STUDENT)
  *   others:  any signed-in user (valid JWT): read topics, notifications, own profile
@@ -53,14 +54,20 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler))            // 403 JSON
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()   // CORS pre-flight
-                        .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register", "/auth/google").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        // Research: browsing and downloading are public (the service hides non-approved files).
+                        // Research: browsing is public (the service hides non-approved files); downloading is NOT.
                         // "/research/mine" must come BEFORE "/research/{id}" so it is not read as an id.
                         .requestMatchers(HttpMethod.GET, "/research/mine").hasRole("STUDENT")
-                        .requestMatchers(HttpMethod.GET, "/research", "/research/{id}", "/research/{id}/download", "/categories").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/research", "/research/{id}", "/categories",
+                                "/categories/{id}/image", "/users/{id}/avatar", "/research/{id}/image").permitAll()
                         .requestMatchers(HttpMethod.POST, "/research").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.PUT, "/research/{id}").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.DELETE, "/research/{id}").hasAnyRole("STUDENT", "ADMIN")
+                        .requestMatchers("/research-comments/**").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.POST, "/research/{id}/comments").hasRole("STUDENT")
+                        .requestMatchers("/ratings/**").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.POST, "/topics", "/topics/{id}/comments").hasRole("STUDENT")
                         .requestMatchers("/bookmarks/**").hasRole("STUDENT")
                         .anyRequest().authenticated()      // topics (read), notifications, /users/me, /auth/me

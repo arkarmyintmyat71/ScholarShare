@@ -45,8 +45,20 @@ export function AuthProvider({ children }) {
     return signedInUser;
   }, []);
 
-  // Registering does not sign anyone in: the account stays PENDING until an admin approves it.
-  const register = useCallback((details) => authService.register(details), []);
+  const loginWithGoogle = useCallback(async (idToken) => {
+    const signedInUser = await authService.loginWithGoogle(idToken);
+    setUser(signedInUser);
+    setHasSignedOut(false);
+    return signedInUser;
+  }, []);
+
+  // Registering signs the new student in at once: there is no approval step.
+  const register = useCallback(async (details) => {
+    const newUser = await authService.register(details);
+    setUser(newUser);
+    setHasSignedOut(false);
+    return newUser;
+  }, []);
 
   const logout = useCallback(() => {
     authService.logout();
@@ -61,11 +73,12 @@ export function AuthProvider({ children }) {
       hasSignedOut,
       isAuthenticated: Boolean(user),
       login,
+      loginWithGoogle,
       register,
       logout,
       setUser, // used by the profile page after the name/picture is saved
     }),
-    [user, isLoading, hasSignedOut, login, register, logout]
+    [user, isLoading, hasSignedOut, login, loginWithGoogle, register, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,68 +1,46 @@
-import Pagination from "../../../components/pagination/Pagination";
+import { useState } from "react";
+
+import ResearchBrowser from "../../research/ResearchBrowser";
 import StudentResearchCard from "./StudentResearchCard";
 import "./ExploreSection.css";
 
-// Search box + category filter + grid of approved research (from the API) + pager.
-//   explore    = useExploreResearch()      categories = [{ id, name }]      bookmarks = useBookmarks()
-function ExploreSection({ explore, categories, bookmarks }) {
-  const { query, setQuery, categoryId, setCategoryId, page, setPage, data, isLoading, error } = explore;
-  const results = data?.content ?? [];
+const NO_FILTERS = { q: "", categoryId: "", year: "", page: 0 };
+
+// "Explore research": the same search box, category and year filters, result count and pager as the home page,
+// but every card also has Rate / Comment / Save.
+//   bookmarks = useBookmarks()   engagement = useEngagement()   onOpenComments(research) opens the comments window
+function ExploreSection({ bookmarks, engagement, onOpenComments }) {
+  const [filters, setFilters] = useState(NO_FILTERS);
 
   return (
     <section className="sd-section" id="explore">
       <div className="sd-section-heading">
         <div>
-          <span className="sd-eyebrow">RESEARCH LIBRARY</span>
-          <h2>Explore research</h2>
-          <p>Search approved research by topic or category, then save useful resources.</p>
+          <span className="sd-eyebrow">EXPLORE SCHOLARSHARE</span>
+          <h2>Find research that helps you move forward</h2>
         </div>
       </div>
 
-      <div className="sd-filter-row">
-        <label className="sd-search">
-          <span aria-hidden="true">⌕</span>
-          <input
-            type="search"
-            placeholder="Search research..."
-            aria-label="Search research"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </label>
-
-        <select
-          aria-label="Filter research by category"
-          value={categoryId}
-          onChange={(event) => setCategoryId(event.target.value)}
-        >
-          <option value="">All categories</option>
-          {categories.map(({ id, name }) => (
-            <option key={id} value={id}>
-              {name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {error && <p className="sd-empty" role="alert">{error}</p>}
-      {isLoading && !data && <p className="sd-empty">Loading research…</p>}
-
-      <div className="sd-research-grid">
-        {results.map((research) => (
+      <ResearchBrowser
+        filters={filters}
+        onChange={setFilters}
+        gridClassName="sd-research-grid"
+        renderCard={(research) => (
           <StudentResearchCard
             key={research.id}
             research={research}
             isSaved={bookmarks.isSaved(research.id)}
+            rating={engagement.ratingOf(research.id)}
+            ratingAverage={engagement.ratingSummary(research).average}
+            ratingCount={engagement.ratingSummary(research).count}
+            commentCount={engagement.commentCount(research)}
             onToggleSave={() => bookmarks.toggle(research)}
+            onRate={(stars) => engagement.rate(research, stars)}
+            onClearRating={() => engagement.clearRating(research)}
+            onOpenComments={() => onOpenComments(research)}
           />
-        ))}
-      </div>
-
-      {!error && data && results.length === 0 && (
-        <p className="sd-empty">No research matches your search.</p>
-      )}
-
-      <Pagination page={page} totalPages={data?.totalPages} onChange={setPage} />
+        )}
+      />
     </section>
   );
 }

@@ -8,7 +8,6 @@ const FOOTER_COLUMNS = [
     heading: "Explore",
     links: [
       { label: "Research", to: "/#explore" },
-      { label: "Categories", to: ROUTES.categories },
       { label: "Topics", to: ROUTES.topics },
     ],
   },
@@ -17,7 +16,6 @@ const FOOTER_COLUMNS = [
     links: [
       { label: "Sign In", to: ROUTES.login },
       { label: "Register", to: ROUTES.register },
-      { label: "Forgot Password", to: "/forgot-password" },
     ],
   },
   {
@@ -32,7 +30,7 @@ const FOOTER_COLUMNS = [
 const Footer = () => (
   <footer className="footer">
     <div className="footer-brand">
-      <span className="brand-mark">S</span>
+      <img className="brand-mark" src="/logo-mark.svg" alt="" width="44" height="44" />
       <h3>ScholarShare</h3>
       <p>A research resource and topic sharing platform for university students.</p>
     </div>

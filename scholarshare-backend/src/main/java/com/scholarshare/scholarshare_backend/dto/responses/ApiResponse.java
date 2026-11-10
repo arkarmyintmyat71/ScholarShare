@@ -31,7 +31,7 @@ public class ApiResponse<T> {
         return new ApiResponse<>(false, message, null);
     }
 
-    /** An error that also carries details, e.g. { accountStatus: "PENDING" } on a refused login. */
+    /** An error that also carries details, e.g. { accountStatus: "DISABLED" } on a refused login. */
     public static <T> ApiResponse<T> error(String message, T data) {
         return new ApiResponse<>(false, message, data);
     }
